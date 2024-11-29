@@ -1,0 +1,47 @@
+{
+  "image_preprocessing": {
+    "denoise_strength": 10,
+    "contrast_limit": 2.0,
+    "min_rotation_angle": 0.5,
+    "dpi": 300,
+    "quality": 95
+  },
+  "ocr": {
+    "language": "vie",
+    "page_segmentation_mode": 3,
+    "oem": 3,
+    "whitelist": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,/-",
+    "timeout": 30
+  },
+  "table_detection": {
+    "min_line_length": 100,
+    "line_thickness": 2,
+    "min_cell_area": 1000,
+    "min_table_area": 5000
+  },
+  "information_extraction": {
+    "patterns": {
+      "document_number": "Số:\\s*(\\d+\\/[^\\s]+)",
+      "issue_date": "ngày\\s*(\\d{1,2})\\s*tháng\\s*(\\d{1,2})\\s*năm\\s*(\\d{4})",
+      "signer": "Người ký:\\s*([^\\n]+)",
+      "position": "Chức vụ:\\s*([^\\n]+)"
+    }
+  },
+  "cache": {
+    "max_size": 1000,
+    "ttl_hours": 24,
+    "cleanup_interval": 3600
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "logs/ocr.log",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "max_size": 10485760,
+    "backup_count": 5
+  },
+  "database": {
+    "url": "postgresql://user:password@localhost:5432/ocr_db",
+    "pool_size": 5,
+    "max_overflow": 10
+  }
+} 
