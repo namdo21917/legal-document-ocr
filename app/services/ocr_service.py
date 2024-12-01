@@ -2,6 +2,7 @@ import json
 import multiprocessing
 import os
 from datetime import datetime
+from typing import List
 
 from PIL import Image
 from fastapi import UploadFile
@@ -372,3 +373,67 @@ class OCRService:
         except Exception as e:
             self.logger.error(f"Error getting page: {str(e)}")
             raise OCRError(f"Failed to get page: {str(e)}")
+
+    async def get_document_list(
+        self,
+        db: Session,
+        skip: int = 0,
+        limit: int = 10,
+        document_type: str = None
+    ) -> List[DocumentResponse]:
+        """
+        Lấy danh sách documents với phân trang và filter
+        Args:
+            db: Database session
+            skip: Số records bỏ qua
+            limit: Số records lấy
+            document_type: Loại văn bản để filter
+        Returns:
+            List[DocumentResponse]: Danh sách documents đã format
+        """
+        try:
+            # Base query
+            query = db.query(Document)
+            
+            # Apply filters
+            if document_type:
+                query = query.filter(Document.document_type == document_type)
+            
+            # Get total count for pagination
+            total = query.count()
+            
+            # Apply pagination
+            documents = query.offset(skip).limit(limit).all()
+            
+            # Convert to response format
+            responses = []
+            for doc in documents:
+                responses.append(
+                    DocumentResponse(
+                        metadata=DocumentMetadata(
+                            document_id=str(doc.id),
+                            extraction_time=doc.extraction_time,
+                            version=doc.version
+                        ),
+                        document_info=DocumentInfo(
+                            document_type=doc.document_type,
+                            document_number=doc.document_number,
+                            issue_location=doc.issue_location,
+                            issue_date=doc.issue_date,
+                            issuing_agency=doc.issuing_agency,
+                            recipients=doc.recipients,
+                            recipient_address=doc.recipient_address,
+                            signer=doc.signer,
+                            position=doc.position,
+                            subject=doc.subject,
+                            content=doc.content,
+                            page_numbers=doc.page_numbers
+                        )
+                    )
+                )
+            
+            return responses
+
+        except Exception as e:
+            self.logger.error(f"Error getting document list: {str(e)}")
+            raise OCRError(f"Failed to get document list: {str(e)}")
