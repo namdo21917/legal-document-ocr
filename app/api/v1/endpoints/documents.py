@@ -14,7 +14,6 @@ async def create_document(
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
-    """Upload và xử lý OCR cho một tài liệu"""
     try:
         ocr_service = OCRService()
         result = await ocr_service.process_and_save_document(file, db)
