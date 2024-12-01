@@ -1,47 +1,107 @@
 {
-  "image_preprocessing": {
-    "denoise_strength": 10,
-    "contrast_limit": 2.0,
-    "min_rotation_angle": 0.5,
-    "dpi": 300,
-    "quality": 95
-  },
-  "ocr": {
-    "language": "vie",
-    "page_segmentation_mode": 3,
-    "oem": 3,
-    "whitelist": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,/-",
-    "timeout": 30
-  },
-  "table_detection": {
-    "min_line_length": 100,
-    "line_thickness": 2,
-    "min_cell_area": 1000,
-    "min_table_area": 5000
-  },
-  "information_extraction": {
-    "patterns": {
-      "document_number": "Số:\\s*(\\d+\\/[^\\s]+)",
-      "issue_date": "ngày\\s*(\\d{1,2})\\s*tháng\\s*(\\d{1,2})\\s*năm\\s*(\\d{4})",
-      "signer": "Người ký:\\s*([^\\n]+)",
-      "position": "Chức vụ:\\s*([^\\n]+)"
+  "preprocessing": {
+    "clahe_clip_limit": 2.0,
+    "clahe_grid_size": 8,
+    "gaussian_kernel_size": [3, 3],
+    "gaussian_sigma": 0,
+    "morph_kernel_size": [3, 3],
+    "adaptive_block_size": 11,
+    "adaptive_c": 2,
+    "rotation": {
+      "min_angle": -45,
+      "max_angle": 45,
+      "angle_step": 1,
+      "min_text_area": 1000,
+      "min_confidence": 60
     }
   },
-  "cache": {
-    "max_size": 1000,
-    "ttl_hours": 24,
-    "cleanup_interval": 3600
+  "segmentation": {
+    "min_contour_area": 1000,
+    "min_aspect_ratio": 0.1,
+    "max_aspect_ratio": 10.0
   },
-  "logging": {
-    "level": "INFO",
-    "file": "logs/ocr.log",
-    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    "max_size": 10485760,
-    "backup_count": 5
+  "table_detection": {
+    "threshold_value": 180,
+    "horizontal_kernel_length": 50,
+    "vertical_kernel_length": 50,
+    "line_detection_iterations": 2,
+    "intersection_threshold": 10,
+    "min_table_area": 1000,
+    "min_cell_area": 100
   },
-  "database": {
-    "url": "postgresql://user:password@localhost:5432/ocr_db",
-    "pool_size": 5,
-    "max_overflow": 10
+  "document_patterns": {
+    "start_patterns": [
+      "(?i)(công\\s+văn|tờ\\s+trình|quyết\\s+định|thông\\s+báo)",
+      "(?i)số\\s*:\\s*[\\w-]+",
+      "(?i)cộng\\s+hòa\\s+xã\\s+hội\\s+chủ\\s+nghĩa\\s+việt\\s+nam",
+      "(?i)văn\\s+phòng\\s+trung\\s+ương\\s+đảng",
+      "(?i)bộ\\s+[\\w\\s-]+"
+    ],
+    "end_patterns": [
+      "(?i)nơi\\s+nhận\\s*:",
+      "(?i)(k/t|thừa\\s+lệnh|thay\\s+mặt).*?(trưởng|giám đốc)",
+      "(?i)người\\s+ký",
+      "(?i)\\-\\s*Lưu\\s+[VT|VP]",
+      "(?i)\\-\\s*Như\\s+trên"
+    ],
+    "continuation_patterns": {
+      "min_matching_words": 3,
+      "max_words_to_check": 10,
+      "matching_fields": [
+        "document_type",
+        "document_number",
+        "issuing_agency",
+        "issue_date",
+        "signer"
+      ],
+      "min_field_matches": 1
+    }
+  },
+  "extraction_patterns": {
+    "document_type": {
+      "patterns": [
+        "(?i)(CÔNG\\s+VĂN|TỜ\\s+TRÌNH|QUYẾT\\s+ĐỊNH|THÔNG\\s+BÁO)",
+        "(?i)(Số\\s*:\\s*([\\w-]+))"
+      ]
+    },
+    "document_number": {
+      "patterns": [
+        "(?i)Số\\s*:\\s*([\\w-]+)",
+        "(?i)Số\\s+([\\w-]+)"
+      ]
+    },
+    "issue_date": {
+      "patterns": [
+        "(?i)ngày\\s+(\\d{1,2})\\s+tháng\\s+(\\d{1,2})\\s+năm\\s+(\\d{4})",
+        "(?i)(\\d{1,2})/(\\d{1,2})/(\\d{4})"
+      ]
+    },
+    "issuing_agency": {
+      "patterns": [
+        "(?i)(CỘNG\\s+HÒA\\s+XÃ\\s+HỘI\\s+CHỦ\\s+NGHĨA\\s+VIỆT\\s+NAM.*?\\n.*?\\n)(.*?)\\n"
+      ]
+    },
+    "recipients": {
+      "patterns": [
+        "(?i)Kính\\s+gửi:\\s*(.*?)\\n"
+      ]
+    },
+    "recipient_address": {
+      "patterns": [
+        "(?i)Nơi\\s+nhận:\\s*\\n(.*?)\\n\\n"
+      ]
+    },
+    "signer": {
+      "patterns": [
+        "(?i)(Người\\s+ký|NGƯỜI\\s+KÝ):\\s*(.*?)\\n",
+        "(?i)\\n\\s*([A-ZĐÀÁẢÃẠĂẰẮẲẴẶÂẦẤẨẪẬÈÉẺẼẸÊỀẾỂỄỆÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰÝỶỸỴ\\s]+)\\s*\\n"
+      ]
+    },
+    "position": {
+      "patterns": [
+        "(?i)(Chức\\s+vụ|CHỨC\\s+VỤ):\\s*(.*?)\\n",
+        "(?i)([A-Z][a-zđàáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵ\\s]+)"
+      ]
+    }
   }
 } 

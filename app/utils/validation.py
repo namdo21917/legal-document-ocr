@@ -1,4 +1,5 @@
 import os
+from starlette.datastructures import UploadFile
 from PIL import Image
 import json
 
@@ -6,30 +7,59 @@ from app.utils.logger import Logger
 
 
 class Validator:
-    ALLOWED_EXTENSIONS = {'.pdf', '.png', '.jpg', '.jpeg', '.tiff', 'json'}
+    ALLOWED_EXTENSIONS = {'.pdf', '.png', '.jpg', '.jpeg', '.tiff', '.json'}
     MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
 
     def __init__(self):
         self.logger = Logger(__name__).logger
 
-    def validate_file(self, file_path):
+    async def validate_file(self, file):
         """
-        Kiểm tra tính hợp lệ của đường dẫn file
+        Kiểm tra tính hợp lệ của file
         Args:
-            file_path: Đường dẫn file cần kiểm tra
-            allowed_extensions: List các phần mở rộng được cho phép
+            file: Có thể là đường dẫn file (str) hoặc UploadFile
         Returns:
             bool: True nếu hợp lệ, False nếu không hợp lệ
         """
         try:
-            # Kiểm tra file có tồn tại
-            ext = os.path.splitext(file_path)[1].lower()
+            if isinstance(file, (UploadFile, "starlette.datastructures.UploadFile".__class__)):
+                # Kiểm tra file upload
+                filename = file.filename
+                # Kiểm tra kích thước file
+                file_size = 0
+                chunk_size = 1024  # 1KB
+                while chunk := await file.read(chunk_size):
+                    file_size += len(chunk)
+                await file.seek(0)  # Reset file pointer
+                
+                if file_size > self.MAX_FILE_SIZE:
+                    self.logger.error(f"File quá lớn: {file_size} bytes")
+                    return False
+                    
+            elif isinstance(file, (str, bytes, os.PathLike)):
+                # Kiểm tra đường dẫn file
+                filename = str(file)
+                if not os.path.exists(filename):
+                    self.logger.error(f"File không tồn tại: {filename}")
+                    return False
+                    
+                if os.path.getsize(filename) > self.MAX_FILE_SIZE:
+                    self.logger.error(f"File quá lớn: {filename}")
+                    return False
+            else:
+                self.logger.error(f"Kiểu file không hợp lệ: {type(file)}")
+                return False
+
+            # Kiểm tra phần mở rộng
+            ext = os.path.splitext(filename)[1].lower()
             if ext not in self.ALLOWED_EXTENSIONS:
-                raise ValueError(f"Không hỗ trợ định dạng file {ext}")
+                self.logger.error(f"Không hỗ trợ định dạng file {ext}")
+                return False
 
             return True
+
         except Exception as e:
-            self.logger.error(f"Lỗi kiểm tra đường dẫn file: {str(e)}")
+            self.logger.error(f"Lỗi kiểm tra file: {str(e)}")
             return False
 
     def validate_image(self, image):
@@ -61,7 +91,7 @@ class Validator:
 
     def validate_config(self, config):
         """
-        Kiểm tra tính hợp lệ của c���u hình
+        Kiểm tra tính hợp lệ của cấu hình
         Args:
             config: Dict cấu hình
         Returns:

@@ -1,0 +1,23 @@
+[
+    {
+      "metadata": {
+        "document_id": "1",
+        "extraction_time": "2024-11-12T12:34:56.789",
+        "version": "1.0"
+      },
+      "document_info": {
+        "document_type": "TỜ TRÌNH",
+        "document_number": "391-TTr/VTCCB-TH",
+        "issue_location": "Hà Nội",
+        "issue_date": "28/11/2017",
+        "issuing_agency": "VĂN PHÒNG TRUNG ƯƠNG ĐẢNG\r\nVỤ TỔ CHỨC - CÁN BỘ",
+        "recipients": "Đồng chí Hoàng Công Hoàn,\r\nPhó Chánh Văn phòng Thường trực",
+        "recipient_address": "- Như trên\r\n-Đ/c Vụ trưởng (để b/c)\r\n-Lưu phòng tổng hợp",
+        "signer": "Dương Thị Hiền",
+        "position": "PHÓ VỤ TRƯỞNG",
+        "subject": "V/v cử cán bộ tham gia Đoàn Nhà xuất bản Chính trị quốc gia\r\nđi công tác tại Lào",
+        "content": "...",
+        "page_numbers": [1, 2]
+      }
+    }
+    ]

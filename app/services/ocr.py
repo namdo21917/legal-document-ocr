@@ -144,9 +144,3 @@ class OCRModule:
         except Exception as e:
             self.logger.error(f"Lỗi nhận dạng văn bản: {str(e)}")
             return "", 0
-
-    def cleanup(self):
-        """
-        Giải phóng tài nguyên
-        """
-        pass

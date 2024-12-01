@@ -6,7 +6,7 @@ class Document(Base):
     __tablename__ = "documents"
 
     id = Column(Integer, primary_key=True, index=True)
-    document_id = Column(String(100), unique=True, index=True)
+    document_id = Column(String(100))
     extraction_time = Column(DateTime)
     version = Column(String(50))
     document_type = Column(String(100))
