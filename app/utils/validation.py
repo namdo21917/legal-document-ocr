@@ -1,7 +1,9 @@
 import os
 from PIL import Image
 import json
-from logger import Logger
+
+from app.utils.logger import Logger
+
 
 class Validator:
     ALLOWED_EXTENSIONS = {'.pdf', '.png', '.jpg', '.jpeg', '.tiff', 'json'}

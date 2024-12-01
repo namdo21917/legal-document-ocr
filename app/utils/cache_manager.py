@@ -3,7 +3,8 @@ import json
 import hashlib
 import pickle
 from datetime import datetime, timedelta
-from logger import Logger
+
+from app.utils.logger import Logger
 
 
 class CacheManager:
