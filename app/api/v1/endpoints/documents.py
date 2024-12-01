@@ -5,13 +5,12 @@ from sqlalchemy.orm import Session
 
 from app.db.base import get_db
 from app.schemas.document import Document
-from app.utils.exceptions import OCRException
-# from app.services.ocr_service import OCRService
-from app.utils.validation import FileValidator
+from app.services.ocr_service import OCRService
+from app.utils.exceptions import OCRError
+from app.utils.validation import Validator
 
 router = APIRouter()
-file_validator = FileValidator()
-
+validator = Validator()
 
 @router.post("/", response_model=Document)
 async def create_document(
@@ -19,11 +18,11 @@ async def create_document(
         db: Session = Depends(get_db)
 ):
     try:
-        await file_validator.validate_upload_file(file)
-        # ocr_service = OCRService()
-        # document_data = await ocr_service.process_document(file)
-        # return await ocr_service.save_document(db, document_data)
-    except OCRException as e:
+        await validator.validate_file(file)
+        ocr_service = OCRService()
+        document_data = await ocr_service.process_document(file)
+        return await ocr_service.save_document(db, document_data)
+    except OCRError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
 
