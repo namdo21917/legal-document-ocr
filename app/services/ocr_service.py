@@ -67,25 +67,26 @@ class OCRService:
         """
         self.logger.info(f"Bắt đầu xử lý tài liệu")
         try:
-            # Tạo thư mục output
-            output_dir = 'output'
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
+            # Tạo các thư mục cần thiết
+            for dir_path in ['output', 'input_img']:
+                if not os.path.exists(dir_path):
+                    os.makedirs(dir_path)
 
-            # Xử lý tên file
+            # Xử lý file input
             if isinstance(file, UploadFile):
-                base_name = os.path.splitext(file.filename)[0]
-                # Lưu file tạm thời để xử lý
-                temp_file = f"temp_{base_name}.pdf"
-                with open(temp_file, "wb") as buffer:
+                # Tạo tên file với timestamp để tránh trùng lặp
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                filename = f"{timestamp}_{file.filename}"
+                input_path = os.path.join('input_img', filename)
+                
+                # Lưu file vào thư mục input_img
+                with open(input_path, "wb") as buffer:
                     content = await file.read()
                     buffer.write(content)
-                await file.seek(0)  # Reset file pointer
-                input_path = temp_file
+                await file.seek(0)
             else:
                 input_path = file
-                base_name = os.path.splitext(os.path.basename(input_path))[0]
-
+                
             try:
                 # Đọc và xử lý ảnh
                 if input_path.lower().endswith('.pdf'):
@@ -94,10 +95,6 @@ class OCRService:
                         raise FileError("Không thể chuyển đổi PDF", input_path)
                 else:
                     images = [Image.open(input_path)]
-
-                # Xóa file tạm nếu có
-                if isinstance(file, UploadFile) and os.path.exists(temp_file):
-                    os.remove(temp_file)
 
                 all_results = []
                 # Xử lý từng trang
@@ -155,9 +152,10 @@ class OCRService:
                 merged_docs = self.document_merger.merge_documents(all_results)
 
                 # Lưu kết quả đã gộp
+                base_name = os.path.splitext(os.path.basename(input_path))[0]
                 self.document_merger.save_merged_documents(
                     merged_docs,
-                    output_dir,
+                    'output',
                     base_name
                 )
 
@@ -166,13 +164,12 @@ class OCRService:
                     'success': True,
                     'num_pages': len(all_results),
                     'num_documents': len(merged_docs),
-                    'documents': merged_docs  # Trả về danh sách văn bản đã gộp
+                    'documents': merged_docs,
+                    'input_path': input_path  # Thêm đường dẫn file input vào response
                 }
 
             except Exception as e:
                 self.logger.error(f"Lỗi xử lý tài liệu: {str(e)}")
-                if isinstance(file, UploadFile) and os.path.exists(temp_file):
-                    os.remove(temp_file)
                 raise
 
         except Exception as e:
