@@ -110,27 +110,21 @@ class ImagePreprocessor:
             self.logger.error(f"Lỗi chuyển đổi PDF: {str(e)}")
             return None
 
-    def _evaluate_rotation(self, image, angle):
-        """
-        Đánh giá chất lượng xoay ảnh bằng OCR
-        """
-        try:
-            if not isinstance(image, Image.Image):
-                image = Image.fromarray(image)
-
-            data = pytesseract.image_to_data(image, lang='vie', output_type=pytesseract.Output.DICT)
-            confidence = float(sum(int(x) for x in data['conf'] if x != '-1')) / len(data['conf'])
-            self.logger.debug(f"Độ tin cậy OCR tại góc {angle:.2f}: {confidence}%")
-            return confidence
-        except Exception as e:
-            self.logger.error(f"Lỗi đánh giá xoay: {str(e)}")
-            return 0
-
-    def cleanup(self):
-        """
-        Không cần cleanup với pytesseract
-        """
-        pass
+    # def _evaluate_rotation(self, image, angle):
+    #     """
+    #     Đánh giá chất lượng xoay ảnh bằng OCR
+    #     """
+    #     try:
+    #         if not isinstance(image, Image.Image):
+    #             image = Image.fromarray(image)
+    #
+    #         data = pytesseract.image_to_data(image, lang='vie', output_type=pytesseract.Output.DICT)
+    #         confidence = float(sum(int(x) for x in data['conf'] if x != '-1')) / len(data['conf'])
+    #         self.logger.debug(f"Độ tin cậy OCR tại góc {angle:.2f}: {confidence}%")
+    #         return confidence
+    #     except Exception as e:
+    #         self.logger.error(f"Lỗi đánh giá xoay: {str(e)}")
+    #         return 0
 
     def preprocess(self, image):
         """

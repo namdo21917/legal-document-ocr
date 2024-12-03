@@ -227,63 +227,6 @@ class OCRService:
                 db.commit()
                 db.refresh(db_document)
 
-                # Lưu các pages của document này
-                doc_pages = []
-                for page_num in doc_info.get('page_numbers', []):
-                    # Tìm thông tin page tương ứng từ all_results
-                    page_data = next(
-                        (p for p in ocr_result.get('all_results', []) 
-                         if p.get('page_number') == page_num), 
-                        None
-                    )
-                    
-                    if page_data:
-                        # Lấy thông tin từ page_info trong info.json
-                        page_info = page_data.get('page_info', {})
-                        extracted_info = page_info.get('extracted_info', {})
-
-                        # Lưu ảnh trang
-                        image_path = self._save_page_image(
-                            page_data['processed_image'], 
-                            doc_info['document_number'], 
-                            page_num
-                        )
-
-                        # Tạo page record với thông tin từ info.json
-                        db_page = Page(
-                            document_id=db_document.id,
-                            page_number=page_num,
-                            extraction_time=datetime.now(),
-                            version="1.0",
-                            
-                            # Thông tin regions và tables từ page_info
-                            text_regions=page_info.get('text_regions', []),
-                            tables=page_info.get('tables', []),
-                            
-                            # OCR text và image path
-                            ocr_text=page_data.get('ocr_text', ''),
-                            image_path=image_path,
-                            
-                            # Thông tin trích xuất từ page
-                            document_type=extracted_info.get('document_type'),
-                            document_number=extracted_info.get('document_number'),
-                            issue_location=extracted_info.get('issue_location'),
-                            issue_date=issue_date,  # Sử dụng ngày đã chuyển đổi từ document
-                            issuing_agency=extracted_info.get('issuing_agency'),
-                            recipients=extracted_info.get('recipients'),
-                            recipient_address=extracted_info.get('recipient_address'),
-                            signer=extracted_info.get('signer'),
-                            position=extracted_info.get('position'),
-                            subject=extracted_info.get('subject')
-                        )
-                        
-                        db.add(db_page)
-                        doc_pages.append(db_page)
-
-                db.commit()
-                for page in doc_pages:
-                    db.refresh(page)
-
                 # Tạo response cho document này
                 document_response = DocumentResponse(
                     metadata=DocumentMetadata(
@@ -315,61 +258,6 @@ class OCRService:
             self.logger.error(f"Error processing document: {str(e)}")
             raise OCRError(f"Failed to process document: {str(e)}")
 
-    def _save_page_image(self, image, document_number: str, page_number: int) -> str:
-        """
-        Lưu ảnh của trang vào storage
-        """
-        try:
-            # Tạo thư mục lưu trữ
-            storage_dir = os.path.join('storage', 'pages', document_number)
-            os.makedirs(storage_dir, exist_ok=True)
-
-            # Tạo tên file và đường dẫn
-            image_filename = f"page_{str(page_number).zfill(3)}.png"
-            image_path = os.path.join(storage_dir, image_filename)
-
-            # Lưu ảnh
-            image.save(image_path)
-
-            return image_path
-
-        except Exception as e:
-            self.logger.error(f"Error saving page image: {str(e)}")
-            raise OCRError(f"Failed to save page image: {str(e)}")
-
-    async def get_page(self, page_id: int, db: Session) -> PageResponse:
-        try:
-            db_page = db.query(Page).filter(Page.id == page_id).first()
-            if not db_page:
-                raise OCRError("Page not found")
-
-            return PageResponse(
-                metadata=PageMetadata(
-                    page_number=db_page.page_number,
-                    extraction_time=db_page.extraction_time,
-                    version=db_page.version
-                ),
-                page_info=PageRegionInfo(
-                    text_regions=db_page.text_regions,
-                    tables=db_page.tables,
-                    extracted_info=DocumentInfo(
-                        document_type=db_page.document_type,
-                        document_number=db_page.document_number,
-                        issue_location=db_page.issue_location,
-                        issue_date=db_page.issue_date,
-                        issuing_agency=db_page.issuing_agency,
-                        recipients=db_page.recipients,
-                        recipient_address=db_page.recipient_address,
-                        signer=db_page.signer,
-                        position=db_page.position,
-                        subject=db_page.subject
-                    )
-                )
-            )
-
-        except Exception as e:
-            self.logger.error(f"Error getting page: {str(e)}")
-            raise OCRError(f"Failed to get page: {str(e)}")
 
     async def get_document_list(
         self,

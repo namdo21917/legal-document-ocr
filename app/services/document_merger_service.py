@@ -15,43 +15,6 @@ class DocumentMerger:
         self.doc_patterns = config['document_patterns']
         self.all_pages = []
 
-    def _save_page_images(self, page_data, page_dir):
-        """
-        Lưu các ảnh của một trang
-        Args:
-            page_data: Dữ liệu của trang
-            page_dir: Thư mục lưu
-        """
-        try:
-            # Lưu ảnh gốc đã xử lý
-            if 'processed_image' in page_data:
-                image = page_data['processed_image']
-                image.save(os.path.join(page_dir, 'image.png'))
-
-                # Tạo ảnh với regions được đánh dấu
-                regions_image = image.copy()
-                draw = ImageDraw.Draw(regions_image)
-                
-                # Vẽ text regions
-                if 'regions' in page_data:
-                    for region in page_data['regions']:
-                        if isinstance(region, np.ndarray):
-                            region = region.tolist()
-                        x, y, w, h = region
-                        draw.rectangle([x, y, x+w, y+h], outline='red', width=2)
-
-                # Vẽ tables nếu có
-                if 'tables' in page_data:
-                    for table in page_data['tables']:
-                        for cell in table.get('cells', []):
-                            pos = cell.get('position', [])
-                            if len(pos) == 4:
-                                draw.rectangle(pos, outline='blue', width=2)
-
-                regions_image.save(os.path.join(page_dir, 'regions.png'))
-
-        except Exception as e:
-            self.logger.error(f"Lỗi lưu ảnh trang: {str(e)}")
 
     def _merge_pages_content(self, pages):
         """
@@ -63,100 +26,100 @@ class DocumentMerger:
                 full_text.append(page['ocr_text'])
         return '\n\n'.join(full_text)
 
-    def _merge_extracted_info(self, pages):
-        """
-        Gộp thông tin trích xuất từ các trang
-        """
-        merged_info = {
-            'document_type': None,
-            'document_number': None,
-            'issue_location': None,
-            'issue_date': None,
-            'issuing_agency': None,
-            'recipients': None,
-            'recipient_address': None,
-            'signer': None,
-            'position': None,
-            'subject': None,
-            'content': None,
-            'page_numbers': []
-        }
+    # def _merge_extracted_info(self, pages):
+    #     """
+    #     Gộp thông tin trích xuất từ các trang
+    #     """
+    #     merged_info = {
+    #         'document_type': None,
+    #         'document_number': None,
+    #         'issue_location': None,
+    #         'issue_date': None,
+    #         'issuing_agency': None,
+    #         'recipients': None,
+    #         'recipient_address': None,
+    #         'signer': None,
+    #         'position': None,
+    #         'subject': None,
+    #         'content': None,
+    #         'page_numbers': []
+    #     }
+    #
+    #     # Gộp thông tin từ các trang
+    #     for page in pages:
+    #         page_info = page.get('extracted_info', {})
+    #         for key in merged_info:
+    #             if not merged_info[key] and page_info.get(key):
+    #                 merged_info[key] = page_info[key]
+    #         merged_info['page_numbers'].append(page.get('page_number'))
+    #
+    #     # Gộp nội dung
+    #     merged_info['content'] = self._merge_pages_content(pages)
+    #     return merged_info
 
-        # Gộp thông tin từ các trang
-        for page in pages:
-            page_info = page.get('extracted_info', {})
-            for key in merged_info:
-                if not merged_info[key] and page_info.get(key):
-                    merged_info[key] = page_info[key]
-            merged_info['page_numbers'].append(page.get('page_number'))
+    # def _is_document_start(self, text):
+    #     """
+    #     Kiểm tra xem đoạn văn bản có phải là bắt đầu của văn bản mới không
+    #     Args:
+    #         text (str): Văn bản cần kiểm tra
+    #     Returns:
+    #         bool: True nếu là bắt đầu văn bản mới
+    #     """
+    #     try:
+    #         # Lấy patterns từ config
+    #         start_patterns = self.doc_patterns['start_patterns']
+    #         for pattern in start_patterns:
+    #             if re.search(pattern, text, re.MULTILINE):
+    #                 return True
+    #         return False
+    #     except Exception as e:
+    #         self.logger.error(f"Lỗi kiểm tra bắt đầu văn bản: {str(e)}")
+    #         return False
 
-        # Gộp nội dung
-        merged_info['content'] = self._merge_pages_content(pages)
-        return merged_info
+    # def _is_document_end(self, text):
+    #     """
+    #     Kiểm tra xem đoạn văn bản có phải là kết thúc của văn bản không
+    #     Args:
+    #         text (str): Văn bản cần kiểm tra
+    #     Returns:
+    #         bool: True nếu là kết thúc văn bản
+    #     """
+    #     try:
+    #         # Lấy patterns từ config
+    #         end_patterns = self.doc_patterns['end_patterns']
+    #         for pattern in end_patterns:
+    #             if re.search(pattern, text, re.MULTILINE):
+    #                 return True
+    #         return False
+    #     except Exception as e:
+    #         self.logger.error(f"Lỗi kiểm tra kết thúc văn bản: {str(e)}")
+    #         return False
 
-    def _is_document_start(self, text):
-        """
-        Kiểm tra xem đoạn văn bản có phải là bắt đầu của văn bản mới không
-        Args:
-            text (str): Văn bản cần kiểm tra
-        Returns:
-            bool: True nếu là bắt đầu văn bản mới
-        """
-        try:
-            # Lấy patterns từ config
-            start_patterns = self.doc_patterns['start_patterns']
-            for pattern in start_patterns:
-                if re.search(pattern, text, re.MULTILINE):
-                    return True
-            return False
-        except Exception as e:
-            self.logger.error(f"Lỗi kiểm tra bắt đầu văn bản: {str(e)}")
-            return False
-
-    def _is_document_end(self, text):
-        """
-        Kiểm tra xem đoạn văn bản có phải là kết thúc của văn bản không
-        Args:
-            text (str): Văn bản cần kiểm tra
-        Returns:
-            bool: True nếu là kết thúc văn bản
-        """
-        try:
-            # Lấy patterns từ config
-            end_patterns = self.doc_patterns['end_patterns']
-            for pattern in end_patterns:
-                if re.search(pattern, text, re.MULTILINE):
-                    return True
-            return False
-        except Exception as e:
-            self.logger.error(f"Lỗi kiểm tra kết thúc văn bản: {str(e)}")
-            return False
-
-    def _is_continuation(self, text1, text2):
-        """
-        Kiểm tra xem văn bản thứ hai có phải là tiếp nối của văn bản thứ nhất không
-        Args:
-            text1 (str): Văn bản thứ nhất
-            text2 (str): Văn bản thứ hai
-        Returns:
-            bool: True nếu là tiếp nối
-        """
-        try:
-            config = self.doc_patterns['continuation_patterns']
-            
-            # Lấy từ cuối và từ đầu để kiểm tra
-            words1 = text1.split()[-config['max_words_to_check']:]
-            words2 = text2.split()[:config['max_words_to_check']]
-            
-            # Đếm số từ trùng nhau
-            common_words = set(words1) & set(words2)
-            if len(common_words) >= config['min_matching_words']:
-                return True
-                
-            return False
-        except Exception as e:
-            self.logger.error(f"Lỗi kiểm tra tiếp nối: {str(e)}")
-            return False
+    # def _is_continuation(self, text1, text2):
+    #     """
+    #     Kiểm tra xem văn bản thứ hai có phải là tiếp nối của văn bản thứ nhất không
+    #     Args:
+    #         text1 (str): Văn bản thứ nhất
+    #         text2 (str): Văn bản thứ hai
+    #     Returns:
+    #         bool: True nếu là tiếp nối
+    #     """
+    #     try:
+    #         config = self.doc_patterns['continuation_patterns']
+    #
+    #         # Lấy từ cuối và từ đầu để kiểm tra
+    #         words1 = text1.split()[-config['max_words_to_check']:]
+    #         words2 = text2.split()[:config['max_words_to_check']]
+    #
+    #         # Đếm số từ trùng nhau
+    #         common_words = set(words1) & set(words2)
+    #         if len(common_words) >= config['min_matching_words']:
+    #             return True
+    #
+    #         return False
+    #     except Exception as e:
+    #         self.logger.error(f"Lỗi kiểm tra tiếp nối: {str(e)}")
+    #         return False
 
     def _is_same_document(self, page1, page2):
         """
