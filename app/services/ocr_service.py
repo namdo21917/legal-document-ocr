@@ -160,13 +160,52 @@ class OCRService:
                 )
 
                 self.logger.info(f"Xử lý thành công {len(all_results)} trang")
-                return {
+                ocr_result = {
                     'success': True,
                     'num_pages': len(all_results),
                     'num_documents': len(merged_docs),
                     'documents': merged_docs,
                     'input_path': input_path  # Thêm đường dẫn file input vào response
                 }
+
+                document_responses = []
+                for doc in ocr_result['documents']:
+                    doc_info = doc['document_info']
+
+                    # Chuyển đổi định dạng ngày tháng
+                    issue_date_str = doc_info.get('issue_date')
+                    issue_date = None
+                    if issue_date_str:
+                        try:
+                            issue_date = datetime.strptime(issue_date_str, '%d/%m/%Y')
+                        except ValueError:
+                            self.logger.warning(f"Không thể chuyển đổi ngày tháng: {issue_date_str}")
+
+                    # Tạo response cho document này
+                    document_response = DocumentResponse(
+                        metadata=DocumentMetadata(
+                            document_id=doc_info.get('document_number', ''),
+                            extraction_time=datetime.now(),
+                            version="1.0"
+                        ),
+                        document_info=DocumentInfo(
+                            document_type=doc_info.get('document_type'),
+                            document_number=doc_info.get('document_number'),
+                            issue_location=doc_info.get('issue_location'),
+                            issue_date=issue_date,
+                            issuing_agency=doc_info.get('issuing_agency'),
+                            recipients=doc_info.get('recipients'),
+                            recipient_address=doc_info.get('recipient_address'),
+                            signer=doc_info.get('signer'),
+                            position=doc_info.get('position'),
+                            subject=doc_info.get('subject'),
+                            content=doc_info.get('content'),
+                            page_numbers=doc_info.get('page_numbers', [])
+                        )
+                    )
+                    document_responses.append(document_response)
+
+                return OCRResponse(documents=document_responses)
 
             except Exception as e:
                 self.logger.error(f"Lỗi xử lý tài liệu: {str(e)}")

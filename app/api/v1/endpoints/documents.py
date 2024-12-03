@@ -17,7 +17,8 @@ async def create_document(
 ):
     try:
         ocr_service = OCRService()
-        result = await ocr_service.save_document(file, db)
+        # result = await ocr_service.save_document(file, db)
+        result = await ocr_service.process_document(file)
         return result
     except OCRError as e:
         raise HTTPException(status_code=400, detail=str(e))
