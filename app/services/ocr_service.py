@@ -13,12 +13,12 @@ from app.models.document import Document
 from app.models.page import Page
 from app.schemas.responses import OCRResponse, DocumentInfo, DocumentMetadata, DocumentResponse, PageMetadata, \
     PageRegionInfo, PageResponse
-from app.services.document_merger import DocumentMerger
-from app.services.image_preprocessing import ImagePreprocessor
-from app.services.information_extraction import InformationExtractor
-from app.services.ocr import OCRModule
-from app.services.region_segmentation import RegionSegmenter
-from app.services.table_detector import TableDetector
+from app.services.document_merger_service import DocumentMerger
+from app.services.image_preprocessing_service import ImagePreprocessor
+from app.services.information_extraction_service import InformationExtractor
+from app.services.ocr_process_service import OCRModule
+from app.services.region_segmentation_service import RegionSegmenter
+from app.services.table_detector_service import TableDetector
 from app.utils.cache_manager import CacheManager
 from app.utils.exceptions import FileError, OCRProcessError, OCRError
 from app.utils.logger import Logger
@@ -179,7 +179,7 @@ class OCRService:
                 'error': str(e)
             }
 
-    async def process_and_save_document(self, file: UploadFile, db: Session) -> OCRResponse:
+    async def save_document(self, file: UploadFile, db: Session) -> OCRResponse:
         try:
             # Validate file
             if not await self.validator.validate_file(file):

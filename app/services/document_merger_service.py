@@ -5,7 +5,7 @@ import os
 from PIL import Image, ImageDraw
 import numpy as np
 
-from app.services.information_extraction import InformationExtractor
+from app.services.information_extraction_service import InformationExtractor
 from app.utils.logger import Logger
 
 class DocumentMerger:
