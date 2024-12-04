@@ -47,3 +47,20 @@ async def get_documents(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/save", response_model=OCRResponse)
+async def save_document(
+    document_data: dict,
+    db: Session = Depends(get_db)
+):
+    """
+    Lưu thông tin document vào database
+    """
+    try:
+        ocr_service = OCRService()
+        result = await ocr_service.save_document(document_data, db)
+        return result
+    except OCRError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

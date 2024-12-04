@@ -218,24 +218,20 @@ class OCRService:
                 'error': str(e)
             }
 
-    async def save_document(self, file: UploadFile, db: Session) -> OCRResponse:
+    async def save_document(self, document_data: dict, db: Session) -> OCRResponse:
+        """
+        Lưu thông tin document từ JSON vào database
+        Args:
+            document_data: JSON kết quả từ API create_document
+            db: Database session
+        Returns:
+            OCRResponse: Thông tin document đã lưu
+        """
         try:
-            # Validate file
-            if not await self.validator.validate_file(file):
-                raise OCRError("Invalid file format")
-
-            # Xử lý OCR
-            ocr_result = await self.process_document(file)
-            if not ocr_result['success']:
-                raise OCRError(ocr_result['error'])
-
-            # Lưu từng document từ kết quả OCR
             document_responses = []
-            for doc in ocr_result['documents']:
-                doc_info = doc['document_info']
-
+            for doc in document_data['documents']:
                 # Chuyển đổi định dạng ngày tháng
-                issue_date_str = doc_info.get('issue_date')
+                issue_date_str = doc['document_info'].get('issue_date')
                 issue_date = None
                 if issue_date_str:
                     try:
@@ -245,28 +241,28 @@ class OCRService:
 
                 # Tạo document trong database
                 db_document = Document(
-                    document_id=doc_info.get('document_number', ''),
+                    document_id=doc['document_info'].get('document_number', ''),
                     extraction_time=datetime.now(),
                     version="1.0",
-                    document_type=doc_info.get('document_type'),
-                    document_number=doc_info.get('document_number'),
-                    issue_location=doc_info.get('issue_location'),
+                    document_type=doc['document_info'].get('document_type'),
+                    document_number=doc['document_info'].get('document_number'),
+                    issue_location=doc['document_info'].get('issue_location'),
                     issue_date=issue_date,
-                    issuing_agency=doc_info.get('issuing_agency'),
-                    recipients=doc_info.get('recipients'),
-                    recipient_address=doc_info.get('recipient_address'),
-                    signer=doc_info.get('signer'),
-                    position=doc_info.get('position'),
-                    subject=doc_info.get('subject'),
-                    content=doc_info.get('content'),
-                    page_numbers=doc_info.get('page_numbers', [])
+                    issuing_agency=doc['document_info'].get('issuing_agency'),
+                    recipients=doc['document_info'].get('recipients'),
+                    recipient_address=doc['document_info'].get('recipient_address'),
+                    signer=doc['document_info'].get('signer'),
+                    position=doc['document_info'].get('position'),
+                    subject=doc['document_info'].get('subject'),
+                    content=doc['document_info'].get('content'),
+                    page_numbers=doc['document_info'].get('page_numbers', [])
                 )
 
                 db.add(db_document)
                 db.commit()
                 db.refresh(db_document)
 
-                # Tạo response cho document này
+                # Tạo response cho document đã lưu
                 document_response = DocumentResponse(
                     metadata=DocumentMetadata(
                         document_id=str(db_document.id),
@@ -294,9 +290,8 @@ class OCRService:
 
         except Exception as e:
             db.rollback()
-            self.logger.error(f"Error processing document: {str(e)}")
-            raise OCRError(f"Failed to process document: {str(e)}")
-
+            self.logger.error(f"Error saving document: {str(e)}")
+            raise OCRError(f"Failed to save document: {str(e)}")
 
     async def get_document_list(
         self,
