@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.v1.endpoints import documents, pages
+from app.api.v1.endpoints import documents
 
 api_router = APIRouter()
 
@@ -8,8 +8,3 @@ api_router.include_router(
     prefix="/documents", 
     tags=["documents"]
 )
-api_router.include_router(
-    pages.router, 
-    prefix="/pages", 
-    tags=["pages"]
-) 

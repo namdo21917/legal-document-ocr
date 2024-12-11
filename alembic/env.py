@@ -4,11 +4,9 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
-
+from app.core.config import settings
 # Import Base và models
 from app.db.base import Base
-from app.models import document, page  # Import tất cả models
-from app.core.config import settings
 
 # this is the Alembic Config object
 config = context.config
