@@ -6,14 +6,15 @@ from PIL import Image
 
 from app.utils.cache_manager import CacheManager
 from app.utils.logger import Logger
+from app.core.config import settings
 
 
 class OCRModule:
     def __init__(self):
         self.logger = Logger(__name__).logger
         try:
-            # Chỉ định đường dẫn Tesseract
-            pytesseract.pytesseract.tesseract_cmd = r'E:\OCR_Resources\Tessaract_OCR\tesseract.exe'
+            # Sử dụng đường dẫn từ cấu hình
+            pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
             self.logger.info("Khởi tạo Tesseract thành công")
 
             # Khởi tạo cache manager

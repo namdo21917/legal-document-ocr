@@ -1,5 +1,29 @@
 version: '3.8'
 services:
+  api:
+    container_name: ocr_api
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+      - TESSERACT_CMD=/usr/bin/tesseract
+      - POPPLER_PATH=/usr/lib/x86_64-linux-gnu/poppler
+    volumes:
+      - ./logs:/app/logs
+      - ./cache:/app/cache
+      - ./output:/app/output
+      - ./static:/app/static
+    networks:
+      - ocr_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: always
+
   postgres:
     container_name: postgres_db
     image: postgres:15.4

@@ -10,6 +10,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 
 from app.utils.logger import Logger
+from app.core.config import settings
 
 
 class ImagePreprocessor:
@@ -18,8 +19,8 @@ class ImagePreprocessor:
         self.config = config['preprocessing']
         self.logger.debug("Khởi tạo ImagePreprocessor với cấu hình: " +
                           str(self.config))
-        # Chỉ định đường dẫn Tesseract
-        pytesseract.pytesseract.tesseract_cmd = r'E:\OCR_Resources\Tessaract_OCR\tesseract.exe'
+        # Sử dụng đường dẫn từ cấu hình
+        pytesseract.pytesseract.tesseract_cmd = settings.TESSERACT_CMD
         self.logger.debug("Khởi tạo Tesseract thành công")
 
     def create_pdf_from_text(self, input_path, output_pdf_path=None):
@@ -93,10 +94,9 @@ class ImagePreprocessor:
                     return None
 
             # Chuyển đổi tất cả các trang PDF sang ảnh
-            poppler_path = r"E:\OCR_Resources\poppler\poppler-24.08.0\Library\bin"
             images = convert_from_path(
                 pdf_path,
-                poppler_path=poppler_path
+                poppler_path=settings.POPPLER_PATH
             )
 
             if images:
