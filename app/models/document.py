@@ -21,5 +21,3 @@ class Document(Base):
     subject = Column(Text)
     content = Column(Text)
     page_numbers = Column(JSON)
-
-    pages = relationship("Page", back_populates="document") 
