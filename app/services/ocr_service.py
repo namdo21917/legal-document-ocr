@@ -58,10 +58,6 @@ class OCRService:
     async def process_document(self, file):
         """
         Xử lý văn bản từ file
-        Args:
-            file: Có thể là đường dẫn file (str) hoặc UploadFile
-        Returns:
-            dict: Kết quả xử lý
         """
         self.logger.info(f"Bắt đầu xử lý tài liệu")
         try:
@@ -219,11 +215,6 @@ class OCRService:
     async def save_document(self, document_data: dict, db: Session) -> OCRResponse:
         """
         Lưu thông tin document từ JSON vào database
-        Args:
-            document_data: JSON kết quả từ API create_document
-            db: Database session
-        Returns:
-            OCRResponse: Thông tin document đã lưu
         """
         try:
             document_responses = []
@@ -300,13 +291,6 @@ class OCRService:
     ) -> List[DocumentResponse]:
         """
         Lấy danh sách documents với phân trang và filter
-        Args:
-            db: Database session
-            skip: Số records bỏ qua
-            limit: Số records lấy
-            document_type: Loại văn bản để filter
-        Returns:
-            List[DocumentResponse]: Danh sách documents đã format
         """
         try:
             # Base query

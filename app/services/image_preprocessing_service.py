@@ -26,11 +26,6 @@ class ImagePreprocessor:
     def create_pdf_from_text(self, input_path, output_pdf_path=None):
         """
         Tạo file PDF từ file text
-        Args:
-            input_path: Đường dẫn file đầu vào
-            output_pdf_path: Đường dẫn file PDF đầu ra (tùy chọn)
-        Returns:
-            str: Đường dẫn đến file PDF đã tạo
         """
         try:
             if output_pdf_path is None:
@@ -65,10 +60,6 @@ class ImagePreprocessor:
     def convert_from_pdf(self, pdf_path):
         """
         Chuyển đổi tất cả các trang PDF sang ảnh
-        Args:
-            pdf_path: Đường dẫn đến file PDF
-        Returns:
-            list: Danh sách các ảnh từ các trang PDF
         """
         try:
             self.logger.debug(f"Bắt đầu chuyển đổi PDF: {pdf_path}")
@@ -110,29 +101,9 @@ class ImagePreprocessor:
             self.logger.error(f"Lỗi chuyển đổi PDF: {str(e)}")
             return None
 
-    # def _evaluate_rotation(self, image, angle):
-    #     """
-    #     Đánh giá chất lượng xoay ảnh bằng OCR
-    #     """
-    #     try:
-    #         if not isinstance(image, Image.Image):
-    #             image = Image.fromarray(image)
-    #
-    #         data = pytesseract.image_to_data(image, lang='vie', output_type=pytesseract.Output.DICT)
-    #         confidence = float(sum(int(x) for x in data['conf'] if x != '-1')) / len(data['conf'])
-    #         self.logger.debug(f"Độ tin cậy OCR tại góc {angle:.2f}: {confidence}%")
-    #         return confidence
-    #     except Exception as e:
-    #         self.logger.error(f"Lỗi đánh giá xoay: {str(e)}")
-    #         return 0
-
     def preprocess(self, image):
         """
         Tiền xử lý ảnh để cải thiện kết quả OCR
-        Args:
-            image: Ảnh đầu vào (PIL Image hoặc numpy array)
-        Returns:
-            numpy.ndarray: Ảnh nhị phân đã xử lý
         """
         try:
             self.logger.debug("Bắt đầu tiền xử lý ảnh")

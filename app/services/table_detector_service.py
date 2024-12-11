@@ -10,8 +10,6 @@ class TableDetector:
     def __init__(self, config):
         """
         Khởi tạo TableDetector
-        Args:
-            config: Dict cấu hình cho việc nhận diện bảng
         """
         self.logger = Logger(__name__).logger
         self.config = config['table_detection']
@@ -20,10 +18,6 @@ class TableDetector:
     def _detect_lines(self, image):
         """
         Phát hiện các đường kẻ ngang và dọc trong ảnh
-        Args:
-            image: Ảnh đầu vào (grayscale)
-        Returns:
-            tuple: (đường ngang, đường dọc)
         """
         try:
             # Áp dụng threshold
@@ -65,11 +59,6 @@ class TableDetector:
     def _find_intersections(self, h_lines, v_lines):
         """
         Tìm các điểm giao nhau giữa đường ngang và dọc
-        Args:
-            h_lines: Ảnh chứa đường kẻ ngang
-            v_lines: Ảnh chứa đường kẻ dọc
-        Returns:
-            list: Danh sách các điểm giao nhau
         """
         try:
             # Kết hợp đường ngang và dọc
@@ -99,11 +88,6 @@ class TableDetector:
     def _extract_cells(self, image, intersections):
         """
         Trích xuất các ô trong bảng
-        Args:
-            image: Ảnh gốc
-            intersections: Các điểm giao nhau
-        Returns:
-            list: Danh sách các ô trong bảng
         """
         try:
             # Sắp xếp các điểm theo hàng và cột
@@ -140,10 +124,6 @@ class TableDetector:
     def detect_tables(self, image):
         """
         Phát hiện và trích xuất các bảng trong ảnh
-        Args:
-            image: Ảnh đầu vào (PIL Image hoặc numpy array)
-        Returns:
-            list: Danh sách các bảng phát hiện được
         """
         self.logger.info("Bắt đầu phát hiện bảng")
         try:
@@ -186,11 +166,6 @@ class TableDetector:
     def draw_table_boundaries(self, image, table_info):
         """
         Vẽ khung bảng và các ô
-        Args:
-            image: Ảnh gốc
-            table_info: Thông tin về bảng
-        Returns:
-            PIL.Image: Ảnh đã vẽ khung bảng
         """
         try:
             # Chuyển đổi sang PIL Image nếu cần

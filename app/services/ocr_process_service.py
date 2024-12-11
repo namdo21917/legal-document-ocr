@@ -31,10 +31,6 @@ class OCRModule:
     def recognize_regions(self, region_images):
         """
         Thực hiện OCR trên nhiều vùng ảnh song song
-        Args:
-            region_images: List các ảnh vùng cần nhận dạng
-        Returns:
-            list: Danh sách kết quả OCR cho từng vùng
         """
         self.logger.info(f"Bắt đầu nhận dạng {len(region_images)} vùng văn bản")
         results = []
@@ -77,10 +73,6 @@ class OCRModule:
     def _process_single_region(self, image):
         """
         Xử lý OCR cho một vùng ảnh
-        Args:
-            image: Ảnh cần nhận dạng (PIL Image)
-        Returns:
-            dict: Kết quả OCR bao gồm text và confidence
         """
         try:
             # Kiểm tra cache trước
@@ -120,28 +112,3 @@ class OCRModule:
                 'text': '',
                 'confidence': 0
             }
-
-    # def recognize_text(self, image):
-    #     """
-    #     Thực hiện OCR trên một ảnh đơn
-    #     Args:
-    #         image: Ảnh cần nhận dạng
-    #     Returns:
-    #         tuple: (văn bản nhận dạng được, độ tin cậy)
-    #     """
-    #     try:
-    #         if not isinstance(image, Image.Image):
-    #             image = Image.fromarray(image)
-    #
-    #         text = pytesseract.image_to_string(image, lang='vie')
-    #         data = pytesseract.image_to_data(image, lang='vie', output_type=pytesseract.Output.DICT)
-    #
-    #         # Tính toán độ tin cậy trung bình
-    #         confidences = [float(conf) for conf in data['conf'] if conf != '-1']
-    #         confidence = sum(confidences) / len(confidences) if confidences else 0
-    #
-    #         self.logger.debug(f"Nhận dạng văn bản: độ tin cậy {confidence}%")
-    #         return text.strip(), confidence
-    #     except Exception as e:
-    #         self.logger.error(f"Lỗi nhận dạng văn bản: {str(e)}")
-    #         return "", 0

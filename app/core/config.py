@@ -15,7 +15,6 @@ class Settings(BaseSettings):
     # Tesseract configuration
     TESSERACT_CMD: str = os.getenv(
         'TESSERACT_CMD',
-        # Default path for different environments
         'tesseract' if os.name != 'nt' else r'C:\Users\adminb\Desktop\STUDY\IT\LapTrinhPython\tessaract\tesseract.exe'
         #r'E:\OCR_Resources\Tessaract_OCR\tesseract.exe'
     )
@@ -23,7 +22,6 @@ class Settings(BaseSettings):
     # Poppler configuration
     POPPLER_PATH: str = os.getenv(
         'POPPLER_PATH',
-        # Default path for different environments
         '/usr/lib/x86_64-linux-gnu/poppler' if os.name != 'nt' else r'C:\Users\adminb\Desktop\STUDY\IT\LapTrinhPython\poppler\poppler-24.08.0\Library\bin'
         #r"E:\OCR_Resources\poppler\poppler-24.08.0\Library\bin"
     )

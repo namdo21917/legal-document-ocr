@@ -9,10 +9,6 @@ class RegionSegmenter:
     def find_text_regions(self, binary_image):
         """
         Tìm các vùng văn bản trong ảnh nhị phân sử dụng phát hiện contour
-        Args:
-            binary_image: Ảnh nhị phân đầu vào
-        Returns:
-            list: Danh sách các vùng văn bản (x, y, w, h)
         """
         # Tìm contour
         contours, _ = cv2.findContours(
@@ -40,9 +36,8 @@ class RegionSegmenter:
     
     def draw_regions(self, image, regions):
         """
-        Draw bounding boxes around detected text regions
+        Vẽ vùng phát hiện text
         """
-        # Convert to PIL Image if necessary
         if isinstance(image, np.ndarray):
             image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
         
@@ -62,9 +57,8 @@ class RegionSegmenter:
     
     def extract_regions(self, image, regions):
         """
-        Extract individual region images from the original image
+        Lấy từng vùng ảnh từ vùng gốc
         """
-        # Convert to PIL Image if necessary
         if isinstance(image, np.ndarray):
             image = Image.fromarray(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
         

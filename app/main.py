@@ -30,7 +30,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Đăng ký router API v1
 app.include_router(
     api_router, 
     prefix="/api/v1",
@@ -41,7 +40,6 @@ app.include_router(
 async def root():
     return {"message": "Welcome to Legal Document OCR API"}
 
-# Tùy chỉnh OpenAPI schema
 def custom_openapi():
     if app.openapi_schema:
         return app.openapi_schema

@@ -26,108 +26,9 @@ class DocumentMerger:
                 full_text.append(page['ocr_text'])
         return '\n\n'.join(full_text)
 
-    # def _merge_extracted_info(self, pages):
-    #     """
-    #     Gộp thông tin trích xuất từ các trang
-    #     """
-    #     merged_info = {
-    #         'document_type': None,
-    #         'document_number': None,
-    #         'issue_location': None,
-    #         'issue_date': None,
-    #         'issuing_agency': None,
-    #         'recipients': None,
-    #         'recipient_address': None,
-    #         'signer': None,
-    #         'position': None,
-    #         'subject': None,
-    #         'content': None,
-    #         'page_numbers': []
-    #     }
-    #
-    #     # Gộp thông tin từ các trang
-    #     for page in pages:
-    #         page_info = page.get('extracted_info', {})
-    #         for key in merged_info:
-    #             if not merged_info[key] and page_info.get(key):
-    #                 merged_info[key] = page_info[key]
-    #         merged_info['page_numbers'].append(page.get('page_number'))
-    #
-    #     # Gộp nội dung
-    #     merged_info['content'] = self._merge_pages_content(pages)
-    #     return merged_info
-
-    # def _is_document_start(self, text):
-    #     """
-    #     Kiểm tra xem đoạn văn bản có phải là bắt đầu của văn bản mới không
-    #     Args:
-    #         text (str): Văn bản cần kiểm tra
-    #     Returns:
-    #         bool: True nếu là bắt đầu văn bản mới
-    #     """
-    #     try:
-    #         # Lấy patterns từ config
-    #         start_patterns = self.doc_patterns['start_patterns']
-    #         for pattern in start_patterns:
-    #             if re.search(pattern, text, re.MULTILINE):
-    #                 return True
-    #         return False
-    #     except Exception as e:
-    #         self.logger.error(f"Lỗi kiểm tra bắt đầu văn bản: {str(e)}")
-    #         return False
-
-    # def _is_document_end(self, text):
-    #     """
-    #     Kiểm tra xem đoạn văn bản có phải là kết thúc của văn bản không
-    #     Args:
-    #         text (str): Văn bản cần kiểm tra
-    #     Returns:
-    #         bool: True nếu là kết thúc văn bản
-    #     """
-    #     try:
-    #         # Lấy patterns từ config
-    #         end_patterns = self.doc_patterns['end_patterns']
-    #         for pattern in end_patterns:
-    #             if re.search(pattern, text, re.MULTILINE):
-    #                 return True
-    #         return False
-    #     except Exception as e:
-    #         self.logger.error(f"Lỗi kiểm tra kết thúc văn bản: {str(e)}")
-    #         return False
-
-    # def _is_continuation(self, text1, text2):
-    #     """
-    #     Kiểm tra xem văn bản thứ hai có phải là tiếp nối của văn bản thứ nhất không
-    #     Args:
-    #         text1 (str): Văn bản thứ nhất
-    #         text2 (str): Văn bản thứ hai
-    #     Returns:
-    #         bool: True nếu là tiếp nối
-    #     """
-    #     try:
-    #         config = self.doc_patterns['continuation_patterns']
-    #
-    #         # Lấy từ cuối và từ đầu để kiểm tra
-    #         words1 = text1.split()[-config['max_words_to_check']:]
-    #         words2 = text2.split()[:config['max_words_to_check']]
-    #
-    #         # Đếm số từ trùng nhau
-    #         common_words = set(words1) & set(words2)
-    #         if len(common_words) >= config['min_matching_words']:
-    #             return True
-    #
-    #         return False
-    #     except Exception as e:
-    #         self.logger.error(f"Lỗi kiểm tra tiếp nối: {str(e)}")
-    #         return False
-
     def _is_same_document(self, page1, page2):
         """
         Kiểm tra xem hai trang có thuộc cùng một văn bản không
-        Args:
-            page1, page2: Thông tin hai trang cần kiểm tra
-        Returns:
-            bool: True nếu cùng một văn bản
         """
         try:
             # Kiểm tra số văn bản
@@ -170,10 +71,6 @@ class DocumentMerger:
     def _is_empty_page(self, page_data):
         """
         Kiểm tra trang trống
-        Args:
-            page_data: Dữ liệu trang cần kiểm tra
-        Returns:
-            bool: True nếu là trang trống
         """
         # Kiểm tra nội dung OCR
         if not page_data.get('ocr_text', '').strip():
@@ -193,10 +90,6 @@ class DocumentMerger:
     def _normalize_text(self, text):
         """
         Chuẩn hóa text để so sánh
-        Args:
-            text: Text cần chuẩn hóa
-        Returns:
-            str: Text đã chuẩn hóa
         """
         if not text:
             return ""
@@ -208,10 +101,6 @@ class DocumentMerger:
     def _convert_to_serializable(self, obj):
         """
         Chuyển đổi object thành dạng có thể serialize JSON
-        Args:
-            obj: Object cần chuyển đổi
-        Returns:
-            object: Object đã chuyển đổi
         """
         if isinstance(obj, np.ndarray):
             return obj.tolist()
@@ -224,10 +113,6 @@ class DocumentMerger:
     def _extract_document_info(self, pages):
         """
         Trích xuất thông tin văn bản từ các trang
-        Args:
-            pages: Danh sách các trang của văn bản
-        Returns:
-            dict: Thông tin đã trích xuất
         """
         # Lấy text từ tất cả các trang
         full_text = '\n\n'.join(page['ocr_text'] for page in pages)
@@ -305,10 +190,6 @@ class DocumentMerger:
     def merge_documents(self, page_results):
         """
         Gộp các trang thành văn bản hoàn chỉnh
-        Args:
-            page_results (list): Danh sách kết quả xử lý từng trang
-        Returns:
-            list: Danh sách các văn bản đã gộp
         """
         try:
             self.logger.info("Bắt đầu gộp văn bản")
@@ -364,10 +245,6 @@ class DocumentMerger:
     def save_merged_documents(self, documents, output_dir, base_name):
         """
         Lưu các văn bản đã gộp theo cấu trúc thư mục chuẩn
-        Args:
-            documents: Danh sách văn bản đã gộp
-            output_dir: Thư mục gốc để lưu
-            base_name: Tên file gốc
         """
         try:
             # Tạo cấu trúc thư mục
