@@ -26,7 +26,6 @@ class DocumentResponse(BaseModel):
     metadata: DocumentMetadata
     document_info: DocumentInfo
 
-# Page Response Models
 class PageMetadata(BaseModel):
     page_number: int
     extraction_time: datetime
@@ -41,6 +40,5 @@ class PageResponse(BaseModel):
     metadata: PageMetadata
     page_info: PageRegionInfo
 
-# OCR Response Model (Wrapper)
 class OCRResponse(BaseModel):
     documents: List[DocumentResponse] 
