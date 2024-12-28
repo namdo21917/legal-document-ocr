@@ -3,21 +3,21 @@ from fastapi import APIRouter, Depends, File, UploadFile, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from app.db.base import get_db
+from app.services.document_service import DocumentService
 from app.services.ocr_service import OCRService
 from app.utils.exceptions import OCRError
-from app.schemas.responses import OCRResponse, DocumentResponse
+from app.schemas.responses import OCRResponse, DocumentResponse, DocumentDeleteResponse
 from app.models.document import Document
 
 router = APIRouter()
+ocr_service = OCRService()
+document_service = DocumentService()
 
 @router.post("/", response_model=OCRResponse)
 async def create_document(
     file: UploadFile = File(...),
-    db: Session = Depends(get_db)
 ):
     try:
-        ocr_service = OCRService()
-        # result = await ocr_service.save_document(file, db)
         result = await ocr_service.process_document(file)
         return result
     except OCRError as e:
@@ -36,8 +36,7 @@ async def get_documents(
     Lấy danh sách documents với phân trang và filter
     """
     try:
-        ocr_service = OCRService()
-        return await ocr_service.get_document_list(
+        return await document_service.get_document_list(
             db=db,
             skip=skip,
             limit=limit,
@@ -57,8 +56,56 @@ async def save_document(
     Lưu thông tin document vào database
     """
     try:
-        ocr_service = OCRService()
-        result = await ocr_service.save_document(document_data, db)
+        result = await document_service.save_document(document_data, db)
+        return result
+    except OCRError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/{document_id}/delete", response_model=DocumentDeleteResponse)
+async def delete_document(
+    document_id: str,
+        db: Session = Depends(get_db),
+):
+    """
+    Lưu thông tin document vào database
+    """
+    try:
+        result = await document_service.delete_document(document_id, db)
+        return result
+    except OCRError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/{document_id}", response_model=DocumentResponse)
+async def get_document(
+    document_id: str,
+    db: Session = Depends(get_db)
+):
+    """
+    Lấy thông tin chi tiết của một document theo ID
+    """
+    try:
+        result = await document_service.get_document_by_id(document_id, db)
+        return result
+    except OCRError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/{document_id}", response_model=DocumentResponse)
+async def update_document(
+    document_id: str,
+    document_data: dict,
+    db: Session = Depends(get_db)
+):
+    """
+    Cập nhật thông tin của một document
+    """
+    try:
+        result = await document_service.update_document(document_id, document_data, db)
         return result
     except OCRError as e:
         raise HTTPException(status_code=400, detail=str(e))

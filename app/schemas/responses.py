@@ -26,19 +26,10 @@ class DocumentResponse(BaseModel):
     metadata: DocumentMetadata
     document_info: DocumentInfo
 
-class PageMetadata(BaseModel):
-    page_number: int
-    extraction_time: datetime
-    version: str
-
-class PageRegionInfo(BaseModel):
-    text_regions: List[List[int]]
-    tables: List[Any]
-    extracted_info: DocumentInfo
-
-class PageResponse(BaseModel):
-    metadata: PageMetadata
-    page_info: PageRegionInfo
+class DocumentDeleteResponse(BaseModel):
+    success: bool
+    message: str
+    document_id: str
 
 class OCRResponse(BaseModel):
     documents: List[DocumentResponse] 
