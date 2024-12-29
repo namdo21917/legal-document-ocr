@@ -110,29 +110,7 @@ class DocumentService:
             # Convert to response format
             responses = []
             for doc in documents:
-                responses.append(
-                    DocumentResponse(
-                        metadata=DocumentMetadata(
-                            document_id=str(doc.id),
-                            extraction_time=doc.extraction_time,
-                            version=doc.version
-                        ),
-                        document_info=DocumentInfo(
-                            document_type=doc.document_type,
-                            document_number=doc.document_number,
-                            issue_location=doc.issue_location,
-                            issue_date=doc.issue_date,
-                            issuing_agency=doc.issuing_agency,
-                            recipients=doc.recipients,
-                            recipient_address=doc.recipient_address,
-                            signer=doc.signer,
-                            position=doc.position,
-                            subject=doc.subject,
-                            content=doc.content,
-                            page_numbers=doc.page_numbers
-                        )
-                    )
-                )
+                self.get_document_response(doc)
 
             return responses
 
@@ -156,11 +134,11 @@ class DocumentService:
         """
         try:
             # Tìm document cần xóa
-            document = db.query(Document).filter(Document.document_id == document_id).first()
+            document = db.query(Document).filter(Document.id == document_id).first()
             
             # Kiểm tra document có tồn tại không
             if document is None:
-                raise OCRError(f"Không tìm thấy document với ID: {document_id}")
+                raise OCRError(f"Không tìm thấy document với ID: {id}")
             
             # Thực hiện xóa document
             db.delete(document)
@@ -188,27 +166,7 @@ class DocumentService:
             if document is None:
                 raise OCRError(f"Không tìm thấy document với ID: {document_id}")
 
-            return DocumentResponse(
-                metadata=DocumentMetadata(
-                    document_id=str(document.id),
-                    extraction_time=document.extraction_time,
-                    version=document.version
-                ),
-                document_info=DocumentInfo(
-                    document_type=document.document_type,
-                    document_number=document.document_number,
-                    issue_location=document.issue_location,
-                    issue_date=document.issue_date,
-                    issuing_agency=document.issuing_agency,
-                    recipients=document.recipients,
-                    recipient_address=document.recipient_address,
-                    signer=document.signer,
-                    position=document.position,
-                    subject=document.subject,
-                    content=document.content,
-                    page_numbers=document.page_numbers
-                )
-            )
+            return self.get_document_response(document)
 
         except Exception as e:
             self.logger.error(f"Lỗi khi lấy thông tin document {document_id}: {str(e)}")
@@ -217,50 +175,90 @@ class DocumentService:
     async def update_document(self, document_id: str, document_data: dict, db: Session) -> DocumentResponse:
         """
         Cập nhật thông tin của một document
+        
+        Args:
+            document_id: ID của document cần cập nhật
+            document_data: Dữ liệu cập nhật theo cấu trúc DocumentData
+            db: Database session
+            
+        Returns:
+            DocumentResponse: Thông tin document sau khi cập nhật
+            
+        Raises:
+            OCRError: Nếu có lỗi trong quá trình cập nhật
         """
         try:
-            document = db.query(Document).filter(Document.document_id == document_id).first()
+            # Tìm document cần cập nhật
+            document = db.query(Document).filter(Document.id == document_id).first()
             if document is None:
                 raise OCRError(f"Không tìm thấy document với ID: {document_id}")
 
-            # Cập nhật các trường thông tin
-            for field, value in document_data.items():
-                if hasattr(document, field):
-                    # Xử lý đặc biệt cho trường issue_date
-                    if field == 'issue_date' and value:
-                        try:
-                            value = datetime.strptime(value, '%d/%m/%Y')
-                        except ValueError:
-                            self.logger.warning(f"Không thể chuyển đổi ngày tháng: {value}")
-                            continue
-                    setattr(document, field, value)
+            # Mapping dữ liệu từ document_data vào document
+            if 'document_info' in document_data:
+                doc_info = document_data['document_info']
+                
+                # Cập nhật các trường trong document_info
+                document.document_type = doc_info.get('document_type', document.document_type)
+                document.document_number = doc_info.get('document_number', document.document_number)
+                document.issue_location = doc_info.get('issue_location', document.issue_location)
+                document.issuing_agency = doc_info.get('issuing_agency', document.issuing_agency)
+                document.recipients = doc_info.get('recipients', document.recipients)
+                document.recipient_address = doc_info.get('recipient_address', document.recipient_address)
+                document.signer = doc_info.get('signer', document.signer)
+                document.position = doc_info.get('position', document.position)
+                document.subject = doc_info.get('subject', document.subject)
+                document.content = doc_info.get('content', document.content)
+                document.page_numbers = doc_info.get('page_numbers', document.page_numbers)
+                
+                # Xử lý đặc biệt cho trường issue_date
+                issue_date = doc_info.get('issue_date')
+                if issue_date:
+                    try:
+                        if isinstance(issue_date, str):
+                            document.issue_date = datetime.strptime(issue_date, '%d/%m/%Y')
+                        else:
+                            document.issue_date = issue_date
+                    except ValueError as e:
+                        self.logger.warning(f"Không thể chuyển đổi ngày tháng: {issue_date}, error: {str(e)}")
 
+            # Cập nhật metadata nếu có
+            if 'metadata' in document_data:
+                metadata = document_data['metadata']
+                document.version = metadata.get('version', document.version)
+                # Không cho phép cập nhật document_id và extraction_time từ bên ngoài
+                
+            # Lưu thay đổi vào database
             db.commit()
             db.refresh(document)
 
-            return DocumentResponse(
-                metadata=DocumentMetadata(
-                    document_id=str(document.id),
-                    extraction_time=document.extraction_time,
-                    version=document.version
-                ),
-                document_info=DocumentInfo(
-                    document_type=document.document_type,
-                    document_number=document.document_number,
-                    issue_location=document.issue_location,
-                    issue_date=document.issue_date,
-                    issuing_agency=document.issuing_agency,
-                    recipients=document.recipients,
-                    recipient_address=document.recipient_address,
-                    signer=document.signer,
-                    position=document.position,
-                    subject=document.subject,
-                    content=document.content,
-                    page_numbers=document.page_numbers
-                )
-            )
+            # Tạo và trả về response
+            return self.get_document_response(document)
 
         except Exception as e:
             db.rollback()
             self.logger.error(f"Lỗi khi cập nhật document {document_id}: {str(e)}")
             raise OCRError(f"Không thể cập nhật document: {str(e)}")
+
+    def get_document_response(self, document: Document) -> DocumentResponse:
+        return DocumentResponse(
+            metadata=DocumentMetadata(
+                document_id=str(document.id),
+                extraction_time=document.extraction_time,
+                version=document.version
+            ),
+            document_info=DocumentInfo(
+                document_type=document.document_type,
+                document_number=document.document_number,
+                issue_location=document.issue_location,
+                issue_date=document.issue_date,
+                issuing_agency=document.issuing_agency,
+                recipients=document.recipients,
+                recipient_address=document.recipient_address,
+                signer=document.signer,
+                position=document.position,
+                subject=document.subject,
+                content=document.content,
+                page_numbers=document.page_numbers
+            )
+        )
+
