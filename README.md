@@ -1,96 +1,224 @@
-# legal-document-ocr
+# Legal Document OCR
 
-Tôi sẽ hướng dẫn chi tiết các bước chạy dự án trên Windows:
-Cài đặt Python 3.10.0:
-# Tải Python 3.10.0 từ
-https://www.python.org/downloads/release/python-3100/
-# Chọn Windows installer (64-bit)
-# Trong quá trình cài đặt:
-- ✓ Add Python 3.10 to PATH
-- ✓ Install for all users
+## Cấu Trúc Dự Án
+legal_document_ocr/
+│
+├── app/
+│   ├── __init__.py
+│   ├── main.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── config.py          # Cấu hình ứng dụng
+│   │   └── security.py        # Xử lý authentication/authorization
+│   │
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── v1/
+│   │   │   ├── __init__.py
+│   │   │   ├── endpoints/
+│   │   │   │   ├── __init__.py
+│   │   │   │   ├── documents.py    # API xử lý documents
+│   │   │   │   └── pages.py        # API xử lý pages
+│   │   │   └── router.py
+│   │   └── dependencies.py
+│   │
+│   ├── services/
+│   │   ├── __init__.py
+│   │   ├── ocr_service.py     # Xử lý OCR
+│   │   ├── document_parser.py  # Phân tích tài liệu
+│   │   └── storage_service.py  # Quản lý lưu trữ file
+│   │
+│   ├── models/
+│   │   ├── __init__.py
+│   │   ├── document.py        # SQLAlchemy model cho Documents
+│   │   └── page.py           # SQLAlchemy model cho Pages
+│   │
+│   ├── schemas/
+│   │   ├── __init__.py
+│   │   ├── document.py       # Pydantic schemas cho Documents
+│   │   └── page.py          # Pydantic schemas cho Pages
+│   │
+│   ├── crud/
+│   │   ├── __init__.py
+│   │   ├── base.py          # Base CRUD operations
+│   │   ├── document.py      # CRUD cho Documents
+│   │   └── page.py         # CRUD cho Pages
+│   │
+│   ├── db/
+│   │   ├── __init__.py
+│   │   ├── base.py
+│   │   └── session.py
+│   │
+│   └── utils/
+│       ├── __init__.py
+│       ├── file_handlers.py  # Xử lý file
+│       └── validators.py     # Validation helpers
+│
+├── tests/
+│   ├── __init__.py
+│   ├── conftest.py
+│   ├── test_api/
+│   │   ├── test_documents.py
+│   │   └── test_pages.py
+│   └── test_services/
+│       ├── test_ocr.py
+│       └── test_document_parser.py
+│
+├── alembic/
+│   ├── versions/
+│   └── alembic.ini
+│
+├── static/
+│   └── uploads/             # Thư mục lưu file tạm
+│
+├── requirements.txt
+├── .env
+├── .gitignore
+└── README.md
 
-Cài đặt Tesseract OCR:
-# Tải Tesseract installer từ:
-Home
-# Chọn: tesseract-ocr-w64-setup-v5.3.1.20230401.exe
-# Trong quá trình cài đặt:
-- Chọn "Additional language data"
-- ✓ Vietnamese language data
-- Ghi nhớ đường dẫn: C:\Program Files\Tesseract-OCR
 
-Cài đặt Poppler:
-# Tải từ GitHub:
-GitHub - oschwartz10612/poppler-windows: Download Poppler binaries packaged for Windows with dependereleases
-# Tải file: Release-24.02.0-0.zip
-# Giải nén và cài đặt:
-- Tạo thư mục: C:\Program Files\poppler
-- Copy nội dung từ zip vào thư mục vừa tạo
+### Mô tả :
+   Client đẩy tệp (pdf, ảnh) lên hệ thống. Hệ thống sẽ OCR sau đó trả về kết quả dữ liệu dạng json. Thông tin của từng trang, document sau khi OCR sẽ được lưu vào database. Đối với các trang có bảng, hệ thống sẽ trích xuất ra các ô và nội dung của ô đó. Ngoài ra, PDF có nhiều trang thì sẽ trả ra các trang riêng biệt.
 
-Thêm biến môi trường:
-# Mở System Properties:
-Windows + R -> sysdm.cpl -> Advanced -> Environment Variables
-# Trong System Variables -> Path, thêm:
-C:\Program Files\Tesseract-OCR
-C:\Program Files\poppler\Library\bin
+## Chi Tiết Các Logic business
+### 1. image_preprocessing.py
+- Xử lý tiền xử lý ảnh
+- Chuyển đổi màu sắc và format
+- Tăng cường chất lượng ảnh
+- Xoay ảnh tự động
+- Chuyển đổi PDF sang ảnh
 
-Tạo và thiết lập dự án:
-# Tạo thư mục dự án
-cd C:\Users\YourUsername\Documents
-mkdir legal_document_ocr
-cd legal_document_ocr
-# Tạo môi trường ảo
-python -m venv venv
-venv\Scripts\activate
-# Cài đặt dependencies
-pip install -r requirements.txt
+### 2. region_segmentation.py
+- Phân tích và phân đoạn vùng văn bản
+- Phát hiện contours
+- Lọc và sắp xếp vùng văn bản
+- Vẽ khung đánh dấu vùng
 
-Tạo cấu trúc thư mục:
-# Trong thư mục dự án, tạo các thư mục:
-mkdir logs
-mkdir cache
-mkdir output
+### 3. ocr_module.py
+- Xử lý OCR đa luồng
+- Tích hợp Tesseract OCR
+- Quản lý cache kết quả
+- Tối ưu hiệu suất xử lý
 
-Kiểm tra cài đặt:
-# Tạo file test_env.py:
-import sys
-import cv2
-import numpy
-import tesserocr
-from PIL import Image
-from pdf2image import convert_from_path
-print(f"Python version: {sys.version}")
-print(f"Tesseract version: {tesserocr.get_version()}")
-print(f"OpenCV version: {cv2.__version__}")
-print(f"Numpy version: {numpy.__version__}")
-print(f"Pillow version: {Image.__version__}")
-# Chạy test:
-python test_env.py
+### 4. table_detector.py
+- Phát hiện cấu trúc bảng
+- Phân tích đường kẻ và ô
+- Trích xuất nội dung từng ô
+- Vẽ khung bảng
 
-Chạy ứng dụng:
-# Đặt file PDF cần xử lý vào thư mục dự án
-# Ví dụ: document.pdf
-# Chạy OCR:
-python run_ocr.py document.pdf
+### 5. information_extraction.py
+- Trích xuất thông tin theo mẫu
+- Xử lý regex patterns
+- Phân loại thông tin
+- Định dạng kết quả
 
-Kiểm tra kết quả:
-# Kết quả sẽ được lưu trong thư mục output:
-- document_processed.png  # Ảnh đã xử lý
-- document_ocr.txt       # Văn bản OCR
-- document_info.json     # Thông tin trích xuất
-# Log được lưu trong thư mục logs
+### 6. cache_manager.py
+- Quản lý bộ nhớ cache
+- Lưu và đọc kết quả OCR
+- Tự động dọn dẹp cache cũ
+- Tối ưu hiệu suất truy xuất
 
-Xử lý lỗi thường gặp:
-Lỗi Tesseract không tìm thấy:
-# Kiểm tra biến môi trường
-echo %PATH%
-# Hoặc thêm trực tiếp trong code:
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+### 7. validation.py
+- Kiểm tra tính hợp lệ đầu vào
+- Validate file và format
+- Kiểm tra cấu hình
+- Báo lỗi chi tiết
 
-Lỗi pdf2image:
-# Kiểm tra Poppler trong PATH
-where pdftoppm
-# Khởi động lại Command Prompt sau khi thêm PATH
+### 8. exceptions.py
+- Định nghĩa các loại exception
+- Quản lý thông tin lỗi
+- Phân loại lỗi theo module
+- Hỗ trợ debug
 
-Lỗi permission:
-# Chạy Command Prompt với quyền Administrator
-# Kiểm tra quyền truy cập thư mục
+### 9. logger.py
+- Quản lý logging hệ thống
+- Ghi log theo cấp độ
+- Lưu log vào file
+- Hiển thị log console
+
+### 10. run_ocr.py
+- Script chạy chính
+- Xử lý tham số dòng lệnh
+- Kiểm tra môi trường
+- Hiển thị kết quả
+
+### 11. Lưu vào database
+
+### 12. config.json
+- Cấu hình cho các module
+- Tham số xử lý ảnh
+- Pattern trích xuất thông tin:
+- Cấu hình cache và logging
+
+### 13. requirements.txt
+opencv-python-headless==4.8.1.78
+tesserocr==2.6.0
+pdf2image==1.16.3
+pillow==10.0.0
+numpy==1.24.3
+hashlib==20.3.0
+pickle5==0.0.12
+
+
+## Luồng Xử Lý
+
+1. **Đầu vào**
+   - File PDF hoặc ảnh
+   - Kiểm tra tính hợp lệ
+   - Chuyển đổi format
+
+2. **Tiền xử lý**
+   - Xử lý ảnh
+   - Xoay tự động
+   - Tăng cường chất lượng
+
+3. **Phân đoạn**
+   - Tìm vùng văn bản
+   - Phát hiện bảng
+   - Đánh dấu vùng
+
+4. **OCR**
+   - Xử lý song song
+   - Cache kết quả
+   - Nhận dạng text
+
+5. **Trích xuất**
+   - Phân tích nội dung
+   - Trích xuất thông tin
+   - Xử lý bảng
+
+6. **Đầu ra**
+   - Ảnh đã xử lý
+   - Text OCR
+   - JSON kết quả
+   - Log chi tiết
+
+## Cải Tiến
+
+1. **Hiệu suất**
+   - Xử lý song song
+   - Cache thông minh
+   - Tối ưu bộ nhớ
+
+2. **Độ chính xác**
+   - Xoay ảnh tự động
+   - Tăng cường chất lượng
+   - Xử lý bảng thông minh
+
+3. **Bảo trì**
+   - Logging chi tiết
+   - Xử lý lỗi rõ ràng
+   - Cấu trúc module hóa
+
+4. **Mở rộng**
+   - Dễ thêm tính năng
+   - Cấu hình linh hoạt
+   - API rõ ràng
+
+## Yêu Cầu Hệ Thống
+
+- Python 3.7+
+- Tesseract OCR
+- RAM: 4GB+
+- Disk: 1GB+
+- OS: Windows/Linux/MacOS
