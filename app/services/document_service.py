@@ -6,9 +6,12 @@ from sqlalchemy.orm import Session
 from app.models.document import Document
 from app.schemas.responses import OCRResponse, DocumentResponse, DocumentMetadata, DocumentInfo, DocumentDeleteResponse
 from app.utils.exceptions import OCRError
+from app.utils.logger import Logger
 
 
 class DocumentService:
+    def __init__(self):
+        self.logger = Logger(__name__).logger
 
     async def save_document(self, document_data: dict, db: Session) -> OCRResponse:
         """
@@ -181,7 +184,7 @@ class DocumentService:
         Lấy thông tin chi tiết của một document theo ID
         """
         try:
-            document = db.query(Document).filter(Document.document_id == document_id).first()
+            document = db.query(Document).filter(Document.id == document_id).first()
             if document is None:
                 raise OCRError(f"Không tìm thấy document với ID: {document_id}")
 
