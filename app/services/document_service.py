@@ -104,7 +104,29 @@ class DocumentService:
             # Convert to response format
             responses = []
             for doc in documents:
-                self.get_document_response(doc)
+                responses.append(
+                    DocumentResponse(
+                        metadata=DocumentMetadata(
+                            document_id=str(doc.id),
+                            extraction_time=doc.extraction_time,
+                            version=doc.version
+                        ),
+                        document_info=DocumentInfo(
+                            document_type=doc.document_type,
+                            document_number=doc.document_number,
+                            issue_location=doc.issue_location,
+                            issue_date=doc.issue_date,
+                            issuing_agency=doc.issuing_agency,
+                            recipients=doc.recipients,
+                            recipient_address=doc.recipient_address,
+                            signer=doc.signer,
+                            position=doc.position,
+                            subject=doc.subject,
+                            content=doc.content,
+                            page_numbers=doc.page_numbers
+                        )
+                    )
+                )
 
             return responses
 
