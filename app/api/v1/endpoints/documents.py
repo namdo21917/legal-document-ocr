@@ -32,9 +32,6 @@ async def get_documents(
     document_type: str = Query(default=None),
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy danh sách documents với phân trang và filter
-    """
     try:
         return await document_service.get_document_list(
             db=db,
@@ -52,9 +49,6 @@ async def save_document(
     document_data: dict,
     db: Session = Depends(get_db)
 ):
-    """
-    Lưu thông tin document vào database
-    """
     try:
         result = await document_service.save_document(document_data, db)
         return result
@@ -68,9 +62,6 @@ async def delete_document(
     document_id: str,
         db: Session = Depends(get_db),
 ):
-    """
-    Lưu thông tin document vào database
-    """
     try:
         result = await document_service.delete_document(document_id, db)
         return result
@@ -84,9 +75,6 @@ async def get_document(
     document_id: str,
     db: Session = Depends(get_db)
 ):
-    """
-    Lấy thông tin chi tiết của một document theo ID
-    """
     try:
         result = await document_service.get_document_by_id(document_id, db)
         return result
@@ -101,9 +89,6 @@ async def update_document(
     document_data: dict,
     db: Session = Depends(get_db)
 ):
-    """
-    Cập nhật thông tin của một document
-    """
     try:
         result = await document_service.update_document(document_id, document_data, db)
         return result

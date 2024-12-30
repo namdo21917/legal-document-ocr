@@ -2,7 +2,6 @@ from typing import List, Optional, Any
 from pydantic import BaseModel
 from datetime import datetime
 
-# Document Response Models
 class DocumentMetadata(BaseModel):
     document_id: str
     extraction_time: datetime
