@@ -13,7 +13,6 @@ class InformationExtractor:
                           str(list(self.patterns.keys())))
 
     def _clean_text(self, text):
-        """Làm sạch text và giữ nguyên xuống dòng"""
         if not text:
             return ""
         # Chuẩn hóa xuống dòng thành \r\n
@@ -23,7 +22,6 @@ class InformationExtractor:
         return text.strip()
 
     def _extract_location_date(self, text):
-        """Trích xuất địa điểm và ngày ban hành"""
         location_date = {}
 
         # Tìm địa điểm và ngày
@@ -41,7 +39,6 @@ class InformationExtractor:
         return location_date
 
     def _extract_subject(self, text):
-        """Trích xuất trích yếu nội dung"""
         # Tìm trích yếu sau tiêu đề văn bản
         pattern = r'(?i)(?:v/v|về việc)\s+(.*?)(?=\r\n\r\n|\Z)'
         match = re.search(pattern, text, re.DOTALL)
@@ -50,7 +47,6 @@ class InformationExtractor:
         return None
 
     def _extract_agency_info(self, text):
-        """Trích xuất thông tin cơ quan ban hành"""
         # Lấy các dòng đầu tiên cho đến khi gặp ngày tháng
         pattern = r'^(.*?)(?=\r\n.*?ngày|\Z)'
         match = re.search(pattern, text, re.DOTALL)
@@ -63,7 +59,6 @@ class InformationExtractor:
         return None
 
     def extract_information(self, text, document_id=None):
-        """Trích xuất thông tin theo template"""
         self.logger.info("Bắt đầu trích xuất thông tin")
 
         # Làm sạch text
@@ -125,7 +120,6 @@ class InformationExtractor:
             raise
 
     def format_output(self, documents):
-        """Định dạng danh sách văn bản thành JSON"""
         try:
             return json.dumps(documents, ensure_ascii=False, indent=2)
         except Exception as e:

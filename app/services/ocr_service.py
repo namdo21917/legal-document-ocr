@@ -31,7 +31,6 @@ class OCRService:
         self.num_threads = multiprocessing.cpu_count()
 
         try:
-            # Đọc và kiểm tra cấu hình
             if not self.validator.validate_file(config_path):
                 raise ValueError(f"File cấu hình không hợp lệ: {config_path}")
 
@@ -41,7 +40,6 @@ class OCRService:
             if not self.validator.validate_config(self.config):
                 raise ValueError("Cấu hình không hợp lệ")
 
-            # Khởi tạo các module
             self.preprocessor = ImagePreprocessor(self.config)
             self.segmenter = RegionSegmenter(self.config)
             self.ocr = OCRModule()
@@ -56,9 +54,6 @@ class OCRService:
             raise
 
     async def process_document(self, file):
-        """
-        Xử lý văn bản từ file
-        """
         self.logger.info(f"Bắt đầu xử lý tài liệu")
         try:
             # Tạo các thư mục cần thiết
@@ -159,7 +154,7 @@ class OCRService:
                     'num_pages': len(all_results),
                     'num_documents': len(merged_docs),
                     'documents': merged_docs,
-                    'input_path': input_path  # Thêm đường dẫn file input vào response
+                    'input_path': input_path
                 }
 
                 document_responses = []
@@ -175,7 +170,6 @@ class OCRService:
                         except ValueError:
                             self.logger.warning(f"Không thể chuyển đổi ngày tháng: {issue_date_str}")
 
-                    # Tạo response cho document này
                     document_response = DocumentResponse(
                         metadata=DocumentMetadata(
                             document_id=doc_info.get('document_number', ''),

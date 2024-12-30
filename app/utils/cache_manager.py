@@ -9,12 +9,6 @@ from app.utils.logger import Logger
 
 class CacheManager:
     def __init__(self, cache_dir='cache', max_age_days=7):
-        """
-        Khởi tạo CacheManager
-        Args:
-            cache_dir: Thư mục lưu cache
-            max_age_days: Số ngày tối đa lưu cache
-        """
         self.logger = Logger(__name__).logger
         self.cache_dir = cache_dir
         self.max_age = timedelta(days=max_age_days)
@@ -28,13 +22,6 @@ class CacheManager:
         self.cleanup_old_cache()
 
     def generate_key(self, image):
-        """
-        Tạo key cho cache từ ảnh
-        Args:
-            image: PIL Image hoặc numpy array
-        Returns:
-            str: Key của cache
-        """
         try:
             # Chuyển ảnh thành bytes
             if hasattr(image, 'tobytes'):
@@ -50,13 +37,6 @@ class CacheManager:
             return None
 
     def get(self, key):
-        """
-        Lấy kết quả từ cache
-        Args:
-            key: Key của cache
-        Returns:
-            dict: Kết quả OCR hoặc None nếu không tìm thấy
-        """
         try:
             cache_file = os.path.join(self.cache_dir, f"{key}.pickle")
 
@@ -83,12 +63,6 @@ class CacheManager:
             return None
 
     def set(self, key, value):
-        """
-        Lưu kết quả vào cache
-        Args:
-            key: Key của cache
-            value: Giá trị cần lưu
-        """
         try:
             cache_file = os.path.join(self.cache_dir, f"{key}.pickle")
 
@@ -101,9 +75,6 @@ class CacheManager:
             self.logger.error(f"Lỗi lưu cache: {str(e)}")
 
     def cleanup_old_cache(self):
-        """
-        Dọn dẹp các file cache cũ
-        """
         try:
             current_time = datetime.now()
             count = 0

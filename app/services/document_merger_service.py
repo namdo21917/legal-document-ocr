@@ -17,9 +17,6 @@ class DocumentMerger:
 
 
     def _merge_pages_content(self, pages):
-        """
-        Gộp nội dung của các trang thành một văn bản hoàn chỉnh
-        """
         full_text = []
         for page in pages:
             if page.get('ocr_text'):
@@ -27,9 +24,6 @@ class DocumentMerger:
         return '\n\n'.join(full_text)
 
     def _is_same_document(self, page1, page2):
-        """
-        Kiểm tra xem hai trang có thuộc cùng một văn bản không
-        """
         try:
             # Kiểm tra số văn bản
             num1 = self._normalize_text(page1['extracted_info'].get('document_number', ''))
@@ -69,9 +63,6 @@ class DocumentMerger:
             return False
 
     def _is_empty_page(self, page_data):
-        """
-        Kiểm tra trang trống
-        """
         # Kiểm tra nội dung OCR
         if not page_data.get('ocr_text', '').strip():
             return True
@@ -88,9 +79,6 @@ class DocumentMerger:
         return False
 
     def _normalize_text(self, text):
-        """
-        Chuẩn hóa text để so sánh
-        """
         if not text:
             return ""
         # Loại bỏ dấu câu và khoảng trắng thừa
@@ -111,9 +99,6 @@ class DocumentMerger:
         return obj
 
     def _extract_document_info(self, pages):
-        """
-        Trích xuất thông tin văn bản từ các trang
-        """
         # Lấy text từ tất cả các trang
         full_text = '\n\n'.join(page['ocr_text'] for page in pages)
         
@@ -188,9 +173,6 @@ class DocumentMerger:
         return info
 
     def merge_documents(self, page_results):
-        """
-        Gộp các trang thành văn bản hoàn chỉnh
-        """
         try:
             self.logger.info("Bắt đầu gộp văn bản")
             self.all_pages = []
@@ -243,9 +225,6 @@ class DocumentMerger:
             return []
 
     def save_merged_documents(self, documents, output_dir, base_name):
-        """
-        Lưu các văn bản đã gộp theo cấu trúc thư mục chuẩn
-        """
         try:
             # Tạo cấu trúc thư mục
             date_dir = datetime.now().strftime('%Y%m%d')

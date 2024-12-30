@@ -29,9 +29,6 @@ class OCRModule:
             raise
 
     def recognize_regions(self, region_images):
-        """
-        Thực hiện OCR trên nhiều vùng ảnh song song
-        """
         self.logger.info(f"Bắt đầu nhận dạng {len(region_images)} vùng văn bản")
         results = []
 
@@ -71,9 +68,6 @@ class OCRModule:
         return results
 
     def _process_single_region(self, image):
-        """
-        Xử lý OCR cho một vùng ảnh
-        """
         try:
             # Kiểm tra cache trước
             cache_key = self.cache.generate_key(image)

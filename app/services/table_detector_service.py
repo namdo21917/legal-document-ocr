@@ -8,17 +8,11 @@ from app.utils.logger import Logger
 
 class TableDetector:
     def __init__(self, config):
-        """
-        Khởi tạo TableDetector
-        """
         self.logger = Logger(__name__).logger
         self.config = config['table_detection']
         self.logger.debug("Khởi tạo TableDetector với cấu hình: " + str(self.config))
 
     def _detect_lines(self, image):
-        """
-        Phát hiện các đường kẻ ngang và dọc trong ảnh
-        """
         try:
             # Áp dụng threshold
             _, threshold = cv2.threshold(image,
@@ -57,9 +51,6 @@ class TableDetector:
             raise ImageError("Lỗi phát hiện đường kẻ trong bảng")
 
     def _find_intersections(self, h_lines, v_lines):
-        """
-        Tìm các điểm giao nhau giữa đường ngang và dọc
-        """
         try:
             # Kết hợp đường ngang và dọc
             joints = cv2.bitwise_and(h_lines, v_lines)
@@ -86,9 +77,6 @@ class TableDetector:
             raise ImageError("Lỗi tìm điểm giao trong bảng")
 
     def _extract_cells(self, image, intersections):
-        """
-        Trích xuất các ô trong bảng
-        """
         try:
             # Sắp xếp các điểm theo hàng và cột
             sorted_points = intersections[np.lexsort((intersections[:, 1], intersections[:, 0]))]
@@ -122,9 +110,6 @@ class TableDetector:
             raise ImageError("Lỗi trích xuất ô trong bảng")
 
     def detect_tables(self, image):
-        """
-        Phát hiện và trích xuất các bảng trong ảnh
-        """
         self.logger.info("Bắt đầu phát hiện bảng")
         try:
             # Chuyển đổi ảnh sang grayscale nếu cần
@@ -164,9 +149,6 @@ class TableDetector:
             raise ImageError("Lỗi phát hiện bảng trong ảnh")
 
     def draw_table_boundaries(self, image, table_info):
-        """
-        Vẽ khung bảng và các ô
-        """
         try:
             # Chuyển đổi sang PIL Image nếu cần
             if isinstance(image, np.ndarray):

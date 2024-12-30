@@ -24,9 +24,6 @@ class ImagePreprocessor:
         self.logger.debug("Khởi tạo Tesseract thành công")
 
     def create_pdf_from_text(self, input_path, output_pdf_path=None):
-        """
-        Tạo file PDF từ file text
-        """
         try:
             if output_pdf_path is None:
                 output_pdf_path = os.path.splitext(input_path)[0] + "_converted.pdf"
@@ -58,9 +55,6 @@ class ImagePreprocessor:
             return None
 
     def convert_from_pdf(self, pdf_path):
-        """
-        Chuyển đổi tất cả các trang PDF sang ảnh
-        """
         try:
             self.logger.debug(f"Bắt đầu chuyển đổi PDF: {pdf_path}")
 
@@ -102,9 +96,6 @@ class ImagePreprocessor:
             return None
 
     def preprocess(self, image):
-        """
-        Tiền xử lý ảnh để cải thiện kết quả OCR
-        """
         try:
             self.logger.debug("Bắt đầu tiền xử lý ảnh")
 

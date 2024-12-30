@@ -14,9 +14,6 @@ class DocumentService:
         self.logger = Logger(__name__).logger
 
     async def save_document(self, document_data: dict, db: Session) -> OCRResponse:
-        """
-        Lưu thông tin document từ JSON vào database
-        """
         try:
             document_responses = []
             for doc in document_data['documents']:
@@ -90,9 +87,6 @@ class DocumentService:
             limit: int = 10,
             document_type: str = None
     ) -> List[DocumentResponse]:
-        """
-        Lấy danh sách documents với phân trang và filter
-        """
         try:
             # Base query
             query = db.query(Document)
@@ -119,19 +113,6 @@ class DocumentService:
             raise OCRError(f"Failed to get document list: {str(e)}")
 
     async def delete_document(self, document_id: str, db: Session) -> DocumentDeleteResponse:
-        """
-        Xóa document theo document_id
-        
-        Args:
-            document_id: ID của document cần xóa
-            db: Database session
-            
-        Returns:
-            DocumentDeleteResponse: Thông tin về kết quả xóa document
-            
-        Raises:
-            OCRError: Nếu có lỗi trong quá trình xóa
-        """
         try:
             # Tìm document cần xóa
             document = db.query(Document).filter(Document.id == document_id).first()
@@ -158,9 +139,6 @@ class DocumentService:
             raise OCRError(f"Không thể xóa document: {str(e)}")
 
     async def get_document_by_id(self, document_id: str, db: Session) -> DocumentResponse:
-        """
-        Lấy thông tin chi tiết của một document theo ID
-        """
         try:
             document = db.query(Document).filter(Document.id == document_id).first()
             if document is None:
@@ -173,20 +151,6 @@ class DocumentService:
             raise OCRError(f"Không thể lấy thông tin document: {str(e)}")
 
     async def update_document(self, document_id: str, document_data: dict, db: Session) -> DocumentResponse:
-        """
-        Cập nhật thông tin của một document
-        
-        Args:
-            document_id: ID của document cần cập nhật
-            document_data: Dữ liệu cập nhật theo cấu trúc DocumentData
-            db: Database session
-            
-        Returns:
-            DocumentResponse: Thông tin document sau khi cập nhật
-            
-        Raises:
-            OCRError: Nếu có lỗi trong quá trình cập nhật
-        """
         try:
             # Tìm document cần cập nhật
             document = db.query(Document).filter(Document.id == document_id).first()

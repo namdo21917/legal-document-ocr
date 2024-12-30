@@ -14,13 +14,6 @@ class Validator:
         self.logger = Logger(__name__).logger
 
     async def validate_file(self, file):
-        """
-        Kiểm tra tính hợp lệ của file
-        Args:
-            file: Có thể là đường dẫn file (str) hoặc UploadFile
-        Returns:
-            bool: True nếu hợp lệ, False nếu không hợp lệ
-        """
         try:
             if isinstance(file, (UploadFile, "starlette.datastructures.UploadFile".__class__)):
                 # Kiểm tra file upload
@@ -62,41 +55,7 @@ class Validator:
             self.logger.error(f"Lỗi kiểm tra file: {str(e)}")
             return False
 
-    def validate_image(self, image):
-        """
-        Kiểm tra tính hợp lệ của ảnh
-        Args:
-            image: Đối tượng ảnh (PIL Image hoặc numpy array)
-        Returns:
-            bool: True nếu hợp lệ, False nếu không hợp lệ
-        """
-        try:
-            if isinstance(image, Image.Image):
-                # Kiểm tra kích thước ảnh
-                if image.size[0] < 100 or image.size[1] < 100:
-                    self.logger.error("Kích thước ảnh quá nhỏ")
-                    return False
-                # Kiểm tra mode ảnh
-                if image.mode not in ['RGB', 'L']:
-                    self.logger.error(f"Mode ảnh không được hỗ trợ: {image.mode}")
-                    return False
-            else:
-                self.logger.error("Định dạng ảnh không được hỗ trợ")
-                return False
-
-            return True
-        except Exception as e:
-            self.logger.error(f"Lỗi kiểm tra ảnh: {str(e)}")
-            return False
-
     def validate_config(self, config):
-        """
-        Kiểm tra tính hợp lệ của cấu hình
-        Args:
-            config: Dict cấu hình
-        Returns:
-            bool: True nếu hợp lệ, False nếu không hợp lệ
-        """
         required_sections = ['preprocessing', 'segmentation', 'extraction_patterns']
         required_preprocessing = [
             'clahe_clip_limit', 'clahe_grid_size',
