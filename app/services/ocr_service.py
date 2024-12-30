@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from starlette.datastructures import UploadFile
 
 from app.models.document import Document
-from app.schemas.responses import OCRResponse, DocumentInfo, DocumentMetadata, DocumentResponse
+from app.schemas.documents import OCRResponse, DocumentInfo, DocumentMetadata, DocumentResponse
 from app.services.document_merger_service import DocumentMerger
 from app.services.image_preprocessing_service import ImagePreprocessor
 from app.services.information_extraction_service import InformationExtractor

@@ -4,7 +4,7 @@ from typing import List
 from sqlalchemy.orm import Session
 
 from app.models.document import Document
-from app.schemas.responses import OCRResponse, DocumentResponse, DocumentMetadata, DocumentInfo, DocumentDeleteResponse
+from app.schemas.documents import OCRResponse, DocumentResponse, DocumentMetadata, DocumentInfo, DocumentDeleteResponse
 from app.utils.exceptions import OCRError
 from app.utils.logger import Logger
 

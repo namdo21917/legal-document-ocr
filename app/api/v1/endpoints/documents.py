@@ -6,7 +6,7 @@ from app.db.base import get_db
 from app.services.document_service import DocumentService
 from app.services.ocr_service import OCRService
 from app.utils.exceptions import OCRError
-from app.schemas.responses import OCRResponse, DocumentResponse, DocumentDeleteResponse
+from app.schemas.documents import OCRResponse, DocumentResponse, DocumentDeleteResponse
 from app.models.document import Document
 
 router = APIRouter()
