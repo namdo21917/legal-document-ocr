@@ -32,3 +32,10 @@ class DocumentDeleteResponse(BaseModel):
 
 class OCRResponse(BaseModel):
     documents: List[DocumentResponse] 
+
+class PaginatedDocumentResponse(BaseModel):
+    items: List[DocumentResponse]
+    total: int
+    page: int
+    size: int
+    pages: int 
