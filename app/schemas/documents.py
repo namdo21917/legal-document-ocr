@@ -26,7 +26,7 @@ class DocumentResponse(BaseModel):
     document_info: DocumentInfo
 
 class DocumentDeleteResponse(BaseModel):
-    success: bool
+    isSuccess: bool
     message: str
     document_id: str
 
