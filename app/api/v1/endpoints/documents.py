@@ -6,7 +6,7 @@ from app.db.base import get_db
 from app.services.document_service import DocumentService
 from app.services.ocr_service import OCRService
 from app.utils.exceptions import OCRError
-from app.schemas.documents import OCRResponse, DocumentResponse, DocumentDeleteResponse, PaginatedDocumentResponse
+from app.schemas.documents import OCRResponse, DocumentResponse, DocumentDeleteResponse
 from app.models.document import Document
 
 router = APIRouter()
@@ -25,21 +25,18 @@ async def create_document(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/", response_model=PaginatedDocumentResponse)
+@router.get("/", response_model=List[DocumentResponse])
 async def get_documents(
-    page: int = Query(default=1, ge=1, description="Số trang"),
-    size: int = Query(default=10, ge=1, le=100, description="Số bản ghi trên một trang"),
-    document_type: str = Query(default=None, description="Loại document để lọc"),
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
+    document_type: str = Query(default=None),
     db: Session = Depends(get_db)
 ):
     try:
-        # Convert page to skip
-        skip = (page - 1) * size
-        
         return await document_service.get_document_list(
             db=db,
             skip=skip,
-            limit=size,
+            limit=limit,
             document_type=document_type
         )
     except OCRError as e:

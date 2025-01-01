@@ -1,11 +1,10 @@
 from datetime import datetime
 from typing import List
-from math import ceil
 
 from sqlalchemy.orm import Session
 
 from app.models.document import Document
-from app.schemas.documents import OCRResponse, DocumentResponse, DocumentMetadata, DocumentInfo, DocumentDeleteResponse, PaginatedDocumentResponse
+from app.schemas.documents import OCRResponse, DocumentResponse, DocumentMetadata, DocumentInfo, DocumentDeleteResponse
 from app.utils.exceptions import OCRError
 from app.utils.logger import Logger
 
@@ -87,7 +86,7 @@ class DocumentService:
             skip: int = 0,
             limit: int = 10,
             document_type: str = None
-    ) -> PaginatedDocumentResponse:
+    ) -> List[DocumentResponse]:
         try:
             # Base query
             query = db.query(Document)
@@ -99,23 +98,37 @@ class DocumentService:
             # Get total count for pagination
             total = query.count()
 
-            # Calculate pagination info
-            page = skip // limit + 1
-            total_pages = ceil(total / limit) if total > 0 else 0
-
-            # Get records for current page
+            # Apply pagination
             documents = query.offset(skip).limit(limit).all()
 
             # Convert to response format
-            document_responses = [self.get_document_response(doc) for doc in documents]
+            responses = []
+            for doc in documents:
+                responses.append(
+                    DocumentResponse(
+                        metadata=DocumentMetadata(
+                            document_id=str(doc.id),
+                            extraction_time=doc.extraction_time,
+                            version=doc.version
+                        ),
+                        document_info=DocumentInfo(
+                            document_type=doc.document_type,
+                            document_number=doc.document_number,
+                            issue_location=doc.issue_location,
+                            issue_date=doc.issue_date,
+                            issuing_agency=doc.issuing_agency,
+                            recipients=doc.recipients,
+                            recipient_address=doc.recipient_address,
+                            signer=doc.signer,
+                            position=doc.position,
+                            subject=doc.subject,
+                            content=doc.content,
+                            page_numbers=doc.page_numbers
+                        )
+                    )
+                )
 
-            return PaginatedDocumentResponse(
-                items=document_responses,
-                total=total,
-                page=page,
-                size=limit,
-                pages=total_pages
-            )
+            return responses
 
         except Exception as e:
             self.logger.error(f"Error getting document list: {str(e)}")
