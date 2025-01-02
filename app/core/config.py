@@ -14,13 +14,15 @@ class Settings(BaseSettings):
 
     TESSERACT_CMD: str = os.getenv(
         'TESSERACT_CMD',
-        'tesseract' if os.name != 'nt' else r'E:\OCR_Resources\Tessaract_OCR\tesseract.exe'
+        'tesseract'
+        #if os.name != 'nt' else r'E:\OCR_Resources\Tessaract_OCR\tesseract.exe'
         # r'C:\Users\adminb\Desktop\STUDY\IT\LapTrinhPython\tessaract\tesseract.exe'
     )
     
     POPPLER_PATH: str = os.getenv(
         'POPPLER_PATH',
-        '/usr/lib/x86_64-linux-gnu/poppler' if os.name != 'nt' else r"E:\OCR_Resources\poppler\poppler-24.08.0\Library\bin"
+        '/usr/lib/x86_64-linux-gnu/poppler'
+        # if os.name != 'nt' else r"E:\OCR_Resources\poppler\poppler-24.08.0\Library\bin"
         # r'C:\Users\adminb\Desktop\STUDY\IT\LapTrinhPython\poppler\poppler-24.08.0\Library\bin'
     )
 

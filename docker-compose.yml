@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   api:
     container_name: ocr_api
@@ -13,16 +12,19 @@ services:
       - TESSERACT_CMD=/usr/bin/tesseract
       - POPPLER_PATH=/usr/lib/x86_64-linux-gnu/poppler
     volumes:
+      - ./:/app
       - ./logs:/app/logs
       - ./cache:/app/cache
       - ./output:/app/output
       - ./static:/app/static
+      - pip_cache:/root/.cache/pip
     networks:
       - ocr_network
     depends_on:
       postgres:
         condition: service_healthy
     restart: always
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   postgres:
     container_name: postgres_db
@@ -67,4 +69,5 @@ networks:
 
 volumes:
   postgres_data:
-  pgadmin_data: 
+  pgadmin_data:
+  pip_cache: 
