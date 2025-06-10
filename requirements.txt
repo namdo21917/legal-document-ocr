@@ -4,7 +4,7 @@ python-multipart==0.0.18
 sqlalchemy==1.4.54
 psycopg2-binary==2.9.1
 opencv-python-headless==4.8.1.78
-pytesseract==0.3.10d
+pytesseract==0.3.13
 pdf2image==1.16.3
 PyPDF2==3.0.1
 reportlab==4.0.4
@@ -12,3 +12,4 @@ pillow==10.0.0
 numpy==1.24.3
 python-dotenv==1.0.0
 pydantic-settings==2.6.1
+minio==7.2.7

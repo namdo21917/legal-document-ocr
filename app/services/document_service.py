@@ -42,7 +42,9 @@ class DocumentService:
                     position=doc['document_info'].get('position'),
                     subject=doc['document_info'].get('subject'),
                     content=doc['document_info'].get('content'),
-                    page_numbers=doc['document_info'].get('page_numbers', [])
+                    page_numbers=doc['document_info'].get('page_numbers', []),
+                    input_file_url=document_data.get('input_url'),
+                    output_urls=document_data.get('output_urls')
                 )
 
                 db.add(db_document)
@@ -54,7 +56,9 @@ class DocumentService:
                     metadata=DocumentMetadata(
                         document_id=str(db_document.id),
                         extraction_time=db_document.extraction_time,
-                        version="1.0"
+                        version="1.0",
+                        input_file_url=db_document.input_file_url,
+                        output_urls=db_document.output_urls
                     ),
                     document_info=DocumentInfo(
                         document_type=db_document.document_type,
@@ -210,7 +214,9 @@ class DocumentService:
             metadata=DocumentMetadata(
                 document_id=str(document.id),
                 extraction_time=document.extraction_time,
-                version=document.version
+                version=document.version,
+                input_file_url=document.input_file_url,
+                output_urls=document.output_urls
             ),
             document_info=DocumentInfo(
                 document_type=document.document_type,

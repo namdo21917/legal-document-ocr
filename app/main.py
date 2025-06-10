@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.openapi.utils import get_openapi
@@ -17,17 +17,21 @@ app = FastAPI(
 
 origins = [
     settings.CLIENT_ORIGIN,
-    'http://127.0.0.1:5173'
+    'http://localhost:3000',  # React/Next.js dev server
+    'http://127.0.0.1:3000',
+    'http://localhost:8080',  # Vue CLI dev server
+    'http://127.0.0.1:8080',
+    # Thêm các origins khác nếu cần
 ]
-
 
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 app.include_router(
@@ -39,6 +43,7 @@ app.include_router(
 @app.get("/")
 async def root():
     return {"message": "Welcome to Legal Document OCR API"}
+
 
 def custom_openapi():
     if app.openapi_schema:

@@ -17,10 +17,12 @@ from app.services.information_extraction_service import InformationExtractor
 from app.services.ocr_process_service import OCRModule
 from app.services.region_segmentation_service import RegionSegmenter
 from app.services.table_detector_service import TableDetector
+from app.services.minio_service import minio_service
 from app.utils.cache_manager import CacheManager
 from app.utils.exceptions import FileError, OCRProcessError, OCRError
 from app.utils.logger import Logger
 from app.utils.validation import Validator
+from app.core.config import settings
 
 
 class OCRService:
@@ -56,25 +58,28 @@ class OCRService:
     async def process_document(self, file):
         self.logger.info(f"Bắt đầu xử lý tài liệu")
         try:
-            # Tạo các thư mục cần thiết
-            for dir_path in ['output', 'input_img']:
-                if not os.path.exists(dir_path):
-                    os.makedirs(dir_path)
-
             # Xử lý file input
             if isinstance(file, UploadFile):
                 # Tạo tên file với timestamp để tránh trùng lặp
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                 filename = f"{timestamp}_{file.filename}"
-                input_path = os.path.join('input_img', filename)
-                
-                # Lưu file vào thư mục input_img
-                with open(input_path, "wb") as buffer:
-                    content = await file.read()
-                    buffer.write(content)
-                await file.seek(0)
+
+                # Upload file lên MinIO
+                input_url = await minio_service.upload_file(
+                    file=file,
+                    bucket_name=settings.MINIO_INPUT_BUCKET,
+                    object_name=filename
+                )
+
+                # Download file về local để xử lý (tạm thời)
+                temp_input_path = f"temp_{filename}"
+                bucket_name, object_name = minio_service.parse_minio_url(input_url)
+                minio_service.download_file(bucket_name, object_name, temp_input_path)
+                input_path = temp_input_path
+
             else:
                 input_path = file
+                input_url = file
                 
             try:
                 # Đọc và xử lý ảnh
@@ -140,13 +145,16 @@ class OCRService:
                 # Gộp các văn bản liên quan
                 merged_docs = self.document_merger.merge_documents(all_results)
 
-                # Lưu kết quả đã gộp
+                # Lưu kết quả đã gộp lên MinIO
                 base_name = os.path.splitext(os.path.basename(input_path))[0]
-                self.document_merger.save_merged_documents(
+                output_urls = await self.document_merger.save_merged_documents_to_minio(
                     merged_docs,
-                    'output',
                     base_name
                 )
+
+                # Dọn dẹp file tạm
+                if isinstance(file, UploadFile) and os.path.exists(temp_input_path):
+                    os.remove(temp_input_path)
 
                 self.logger.info(f"Xử lý thành công {len(all_results)} trang")
                 ocr_result = {
@@ -154,7 +162,8 @@ class OCRService:
                     'num_pages': len(all_results),
                     'num_documents': len(merged_docs),
                     'documents': merged_docs,
-                    'input_path': input_path
+                    'input_url': input_url,
+                    'output_urls': output_urls
                 }
 
                 document_responses = []

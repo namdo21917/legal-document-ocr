@@ -1,4 +1,4 @@
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Dict
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -6,6 +6,8 @@ class DocumentMetadata(BaseModel):
     document_id: str
     extraction_time: datetime
     version: str
+    input_file_url: Optional[str] = None
+    output_urls: Optional[Dict[str, str]] = None
 
 class DocumentInfo(BaseModel):
     document_type: Optional[str] = None

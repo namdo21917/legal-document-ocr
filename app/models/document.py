@@ -21,3 +21,7 @@ class Document(Base):
     subject = Column(Text)
     content = Column(Text)
     page_numbers = Column(JSON)
+
+    # MinIO storage URLs
+    input_file_url = Column(String(500))  # URL của file input trên MinIO
+    output_urls = Column(JSON)  # Dictionary chứa các URL output trên MinIO
