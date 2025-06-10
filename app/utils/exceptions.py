@@ -38,14 +38,3 @@ class CacheError(OCRError):
     def __init__(self, message, cache_key=None):
         super().__init__(message, error_code='CACHE_ERROR')
         self.cache_key = cache_key
-
-class MinIOError(OCRError):
-    def __init__(self, message, bucket_name=None, object_name=None):
-        super().__init__(message, error_code='MINIO_ERROR')
-        self.bucket_name = bucket_name
-        self.object_name = object_name
-
-class StorageError(OCRError):
-    def __init__(self, message, storage_type=None):
-        super().__init__(message, error_code='STORAGE_ERROR')
-        self.storage_type = storage_type

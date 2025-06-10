@@ -80,29 +80,6 @@ legal_document_ocr/
 ### Mô tả :
    Client đẩy tệp (pdf, ảnh) lên hệ thống. Hệ thống sẽ OCR sau đó trả về kết quả dữ liệu dạng json. Thông tin của từng trang, document sau khi OCR sẽ được lưu vào database. Đối với các trang có bảng, hệ thống sẽ trích xuất ra các ô và nội dung của ô đó. Ngoài ra, PDF có nhiều trang thì sẽ trả ra các trang riêng biệt.
 
-## MinIO Object Storage
-
-Hệ thống đã được tích hợp với MinIO object storage để quản lý file hiệu quả:
-
-### Cấu hình MinIO:
-- **API Port**: 9000
-- **Console Port**: 9001
-- **Buckets**:
-  - `input-files`: Lưu trữ file gốc được upload
-  - `output-files`: Lưu trữ kết quả OCR và file đã xử lý
-  - `cache-files`: Lưu trữ cache để tối ưu hiệu suất
-
-### Luồng lưu trữ file:
-1. **Upload**: File được upload lên bucket `input-files`
-2. **Processing**: Hệ thống xử lý OCR và tạo các file kết quả
-3. **Storage**: Kết quả được lưu vào bucket `output-files`
-4. **Database**: URL của các file được lưu trong database
-5. **Access**: Client có thể download file qua API endpoints
-
-### API Endpoints cho file:
-- `GET /api/v1/documents/{id}/download/{file_type}` - Download file
-- `GET /api/v1/documents/{id}/files` - Liệt kê files của document
-
 ## Chi Tiết Các Logic business
 ### 1. image_preprocessing.py
 - Xử lý tiền xử lý ảnh
@@ -234,7 +211,7 @@ pickle5==0.0.12
    - Cấu trúc module hóa
 
 4. **Mở rộng**
-   - Dễ thêm tính năng  
+   - Dễ thêm tính năng
    - Cấu hình linh hoạt
    - API rõ ràng
 
@@ -242,59 +219,6 @@ pickle5==0.0.12
 
 - Python 3.7+
 - Tesseract OCR
-- Docker & Docker Compose
 - RAM: 4GB+
-- Disk: 2GB+
+- Disk: 1GB+
 - OS: Windows/Linux/MacOS
-
-## Cài Đặt và Chạy
-
-### 1. Clone repository
-```bash
-git clone <repository-url>
-cd legal-document-ocr
-```
-
-### 2. Cấu hình environment
-```bash
-cp .env.example .env
-# Chỉnh sửa file .env theo môi trường của bạn
-```
-
-### 3. Khởi động services
-```bash
-docker-compose up -d
-```
-
-### 4. Khởi tạo MinIO buckets
-```bash
-python scripts/init_minio.py
-```
-
-### 5. Chạy migration database
-```bash
-docker-compose exec api alembic upgrade head
-```
-
-### 6. Truy cập ứng dụng
-- **API Documentation**: http://localhost:8000/docs
-- **MinIO Console**: http://localhost:9001
-- **PgAdmin**: http://localhost:5050
-
-## Environment Variables
-
-```env
-# Database
-DATABASE_PORT=5432
-POSTGRES_PASSWORD=postgres
-POSTGRES_USER=postgres
-POSTGRES_DB=legal_ocr_db
-POSTGRES_HOST=localhost
-POSTGRES_HOSTNAME=localhost
-
-# MinIO
-MINIO_ROOT_USER=minioadmin
-MINIO_ROOT_PASSWORD=minioadmin123
-MINIO_API_PORT=9000
-MINIO_CONSOLE_PORT=9001
-```

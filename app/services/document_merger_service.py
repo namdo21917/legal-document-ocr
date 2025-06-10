@@ -6,9 +6,7 @@ from PIL import Image, ImageDraw
 import numpy as np
 
 from app.services.information_extraction_service import InformationExtractor
-from app.services.minio_service import minio_service
 from app.utils.logger import Logger
-from app.core.config import settings
 
 class DocumentMerger:
     def __init__(self, config):
@@ -305,106 +303,4 @@ class DocumentMerger:
             
         except Exception as e:
             self.logger.error(f"Lỗi lưu văn bản: {str(e)}")
-            raise
-
-    async def save_merged_documents_to_minio(self, documents, base_name):
-        """Lưu kết quả đã gộp lên MinIO"""
-        try:
-            output_urls = {}
-            date_dir = datetime.now().strftime('%Y%m%d')
-
-            # Lưu từng trang
-            for page_data in self.all_pages:
-                page_num = page_data['page_number']
-                page_prefix = f"{date_dir}/{base_name}/pages/page_{str(page_num).zfill(3)}"
-
-                # Lưu ảnh gốc
-                if 'processed_image' in page_data:
-                    import io
-                    img_buffer = io.BytesIO()
-                    page_data['processed_image'].save(img_buffer, format='PNG')
-                    img_buffer.seek(0)
-
-                    image_url = await minio_service.upload_file(
-                        file=img_buffer.getvalue(),
-                        bucket_name=settings.MINIO_OUTPUT_BUCKET,
-                        object_name=f"{page_prefix}/image.png",
-                        content_type="image/png"
-                    )
-                    output_urls[f"page_{page_num}_image"] = image_url
-
-                # Lưu text OCR
-                text_content = page_data['ocr_text'].encode('utf-8')
-                text_url = await minio_service.upload_file(
-                    file=text_content,
-                    bucket_name=settings.MINIO_OUTPUT_BUCKET,
-                    object_name=f"{page_prefix}/full_text.txt",
-                    content_type="text/plain"
-                )
-                output_urls[f"page_{page_num}_text"] = text_url
-
-                # Lưu thông tin trang
-                page_info = {
-                    'metadata': {
-                        'page_number': page_num,
-                        'extraction_time': datetime.now().isoformat(),
-                        'version': '1.0'
-                    },
-                    'page_info': {
-                        'text_regions': self._convert_to_serializable(page_data.get('regions', [])),
-                        'tables': self._convert_to_serializable(page_data.get('tables', [])),
-                        'extracted_info': page_data.get('extracted_info', {})
-                    }
-                }
-                info_content = json.dumps(page_info, ensure_ascii=False, indent=2).encode('utf-8')
-                info_url = await minio_service.upload_file(
-                    file=info_content,
-                    bucket_name=settings.MINIO_OUTPUT_BUCKET,
-                    object_name=f"{page_prefix}/info.json",
-                    content_type="application/json"
-                )
-                output_urls[f"page_{page_num}_info"] = info_url
-
-            # Lưu từng văn bản
-            for doc in documents:
-                doc_id = doc['metadata']['document_id']
-                doc_prefix = f"{date_dir}/{base_name}/documents/document_{doc_id.zfill(3)}"
-
-                # Lưu thông tin văn bản
-                doc_info = self._convert_to_serializable(doc)
-                doc_info_content = json.dumps(doc_info, ensure_ascii=False, indent=2).encode('utf-8')
-                doc_info_url = await minio_service.upload_file(
-                    file=doc_info_content,
-                    bucket_name=settings.MINIO_OUTPUT_BUCKET,
-                    object_name=f"{doc_prefix}/info.json",
-                    content_type="application/json"
-                )
-                output_urls[f"document_{doc_id}_info"] = doc_info_url
-
-                # Lưu nội dung đầy đủ
-                content = doc['document_info']['content'].encode('utf-8')
-                content_url = await minio_service.upload_file(
-                    file=content,
-                    bucket_name=settings.MINIO_OUTPUT_BUCKET,
-                    object_name=f"{doc_prefix}/full_text.txt",
-                    content_type="text/plain"
-                )
-                output_urls[f"document_{doc_id}_content"] = content_url
-
-            # Lưu file tổng hợp
-            serializable_docs = self._convert_to_serializable(documents)
-            summary_content = json.dumps(serializable_docs, ensure_ascii=False, indent=2).encode('utf-8')
-            summary_url = await minio_service.upload_file(
-                file=summary_content,
-                bucket_name=settings.MINIO_OUTPUT_BUCKET,
-                object_name=f"{date_dir}/{base_name}/documents.json",
-                content_type="application/json"
-            )
-            output_urls["summary"] = summary_url
-
-            self.logger.info(f"Đã lưu {len(documents)} văn bản lên MinIO")
-            return output_urls
-
-        except Exception as e:
-            self.logger.error(f"Lỗi lưu văn bản lên MinIO: {str(e)}")
             raise
