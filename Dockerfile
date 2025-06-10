@@ -6,8 +6,14 @@ RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-vie \
     poppler-utils \
+    libpoppler-cpp-dev \
     libgl1-mesa-glx \
+    libglib2.0-0 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
+
+# Verify poppler installation
+RUN which pdftoppm && pdftoppm -h || echo "Poppler not found in PATH"
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt

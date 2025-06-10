@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     
     POPPLER_PATH: str = os.getenv(
         'POPPLER_PATH',
-        '/usr/lib/x86_64-linux-gnu/poppler'
+        '/usr/bin'  # Đường dẫn mặc định trong Ubuntu/Debian container
         # if os.name != 'nt' else r"E:\OCR_Resources\poppler\poppler-24.08.0\Library\bin"
         # r'C:\Users\adminb\Desktop\STUDY\IT\LapTrinhPython\poppler\poppler-24.08.0\Library\bin'
     )

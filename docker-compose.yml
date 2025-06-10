@@ -8,9 +8,9 @@ services:
       - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      - TESSDATA_PREFIX=/usr/share/tesseract-ocr/4.00/tessdata
+      - TESSDATA_PREFIX=/usr/share/tesseract-ocr/5/tessdata
       - TESSERACT_CMD=/usr/bin/tesseract
-      - POPPLER_PATH=/usr/lib/x86_64-linux-gnu/poppler
+      - POPPLER_PATH=/usr/bin
     volumes:
       - ./:/app
       - ./logs:/app/logs

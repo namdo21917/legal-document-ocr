@@ -79,10 +79,36 @@ class ImagePreprocessor:
                     return None
 
             # Chuyển đổi tất cả các trang PDF sang ảnh
-            images = convert_from_path(
-                pdf_path,
-                poppler_path=settings.POPPLER_PATH
-            )
+            # Thử nhiều cách để tìm poppler
+            poppler_paths_to_try = [
+                None,  # Để pdf2image tự tìm
+                settings.POPPLER_PATH,
+                '/usr/bin',
+                '/usr/local/bin',
+            ]
+
+            images = None
+            last_error = None
+
+            for poppler_path in poppler_paths_to_try:
+                try:
+                    self.logger.debug(f"Thử poppler_path: {poppler_path}")
+                    if poppler_path:
+                        images = convert_from_path(pdf_path, poppler_path=poppler_path)
+                    else:
+                        images = convert_from_path(pdf_path)
+
+                    if images:
+                        self.logger.info(f"Thành công với poppler_path: {poppler_path}")
+                        break
+
+                except Exception as e:
+                    last_error = str(e)
+                    self.logger.debug(f"Thất bại với poppler_path {poppler_path}: {str(e)}")
+                    continue
+
+            if not images and last_error:
+                raise Exception(f"Không thể chuyển đổi PDF với tất cả poppler paths. Lỗi cuối: {last_error}")
 
             if images:
                 self.logger.info(f"Chuyển đổi thành công {len(images)} trang PDF")
