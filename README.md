@@ -1,6 +1,14 @@
 # Legal Document OCR
 
-## Cấu Trúc Dự Án
+A comprehensive OCR (Optical Character Recognition) system for processing legal documents with advanced table detection and information extraction capabilities.
+
+## 📋 Overview
+
+This system allows clients to upload files (PDF, images) and receive OCR results in JSON format. The system processes each page and document, storing the results in a database. For pages containing tables, the system extracts individual cells and their content. Multi-page PDFs are processed as separate pages.
+
+## 🏗️ Project Structure
+
+```
 legal_document_ocr/
 │
 ├── app/
@@ -8,8 +16,8 @@ legal_document_ocr/
 │   ├── main.py
 │   ├── core/
 │   │   ├── __init__.py
-│   │   ├── config.py          # Cấu hình ứng dụng
-│   │   └── security.py        # Xử lý authentication/authorization
+│   │   ├── config.py          # Application configuration
+│   │   └── security.py        # Authentication/authorization handling
 │   │
 │   ├── api/
 │   │   ├── __init__.py
@@ -17,32 +25,32 @@ legal_document_ocr/
 │   │   │   ├── __init__.py
 │   │   │   ├── endpoints/
 │   │   │   │   ├── __init__.py
-│   │   │   │   ├── documents.py    # API xử lý documents
-│   │   │   │   └── pages.py        # API xử lý pages
+│   │   │   │   ├── documents.py    # Document API endpoints
+│   │   │   │   └── pages.py        # Page API endpoints
 │   │   │   └── router.py
 │   │   └── dependencies.py
 │   │
 │   ├── services/
 │   │   ├── __init__.py
-│   │   ├── ocr_service.py     # Xử lý OCR
-│   │   ├── document_parser.py  # Phân tích tài liệu
-│   │   └── storage_service.py  # Quản lý lưu trữ file
+│   │   ├── ocr_service.py     # OCR processing service
+│   │   ├── document_parser.py  # Document analysis service
+│   │   └── storage_service.py  # File storage management
 │   │
 │   ├── models/
 │   │   ├── __init__.py
-│   │   ├── document.py        # SQLAlchemy model cho Documents
-│   │   └── page.py           # SQLAlchemy model cho Pages
+│   │   ├── document.py        # SQLAlchemy model for Documents
+│   │   └── page.py           # SQLAlchemy model for Pages
 │   │
 │   ├── schemas/
 │   │   ├── __init__.py
-│   │   ├── document.py       # Pydantic schemas cho Documents
-│   │   └── page.py          # Pydantic schemas cho Pages
+│   │   ├── document.py       # Pydantic schemas for Documents
+│   │   └── page.py          # Pydantic schemas for Pages
 │   │
 │   ├── crud/
 │   │   ├── __init__.py
 │   │   ├── base.py          # Base CRUD operations
-│   │   ├── document.py      # CRUD cho Documents
-│   │   └── page.py         # CRUD cho Pages
+│   │   ├── document.py      # CRUD for Documents
+│   │   └── page.py         # CRUD for Pages
 │   │
 │   ├── db/
 │   │   ├── __init__.py
@@ -51,7 +59,7 @@ legal_document_ocr/
 │   │
 │   └── utils/
 │       ├── __init__.py
-│       ├── file_handlers.py  # Xử lý file
+│       ├── file_handlers.py  # File processing utilities
 │       └── validators.py     # Validation helpers
 │
 ├── tests/
@@ -69,88 +77,89 @@ legal_document_ocr/
 │   └── alembic.ini
 │
 ├── static/
-│   └── uploads/             # Thư mục lưu file tạm
+│   └── uploads/             # Temporary file storage
 │
 ├── requirements.txt
 ├── .env
 ├── .gitignore
 └── README.md
+```
 
+## 🔧 Core Business Logic Components
 
-### Mô tả :
-   Client đẩy tệp (pdf, ảnh) lên hệ thống. Hệ thống sẽ OCR sau đó trả về kết quả dữ liệu dạng json. Thông tin của từng trang, document sau khi OCR sẽ được lưu vào database. Đối với các trang có bảng, hệ thống sẽ trích xuất ra các ô và nội dung của ô đó. Ngoài ra, PDF có nhiều trang thì sẽ trả ra các trang riêng biệt.
-
-## Chi Tiết Các Logic business
 ### 1. image_preprocessing.py
-- Xử lý tiền xử lý ảnh
-- Chuyển đổi màu sắc và format
-- Tăng cường chất lượng ảnh
-- Xoay ảnh tự động
-- Chuyển đổi PDF sang ảnh
+- Image preprocessing operations
+- Color space and format conversion
+- Image quality enhancement
+- Automatic image rotation
+- PDF to image conversion
 
 ### 2. region_segmentation.py
-- Phân tích và phân đoạn vùng văn bản
-- Phát hiện contours
-- Lọc và sắp xếp vùng văn bản
-- Vẽ khung đánh dấu vùng
+- Text region analysis and segmentation
+- Contour detection
+- Text region filtering and sorting
+- Region boundary marking
 
 ### 3. ocr_module.py
-- Xử lý OCR đa luồng
-- Tích hợp Tesseract OCR
-- Quản lý cache kết quả
-- Tối ưu hiệu suất xử lý
+- Multi-threaded OCR processing
+- Tesseract OCR integration
+- Result caching management
+- Performance optimization
 
 ### 4. table_detector.py
-- Phát hiện cấu trúc bảng
-- Phân tích đường kẻ và ô
-- Trích xuất nội dung từng ô
-- Vẽ khung bảng
+- Table structure detection
+- Line and cell analysis
+- Individual cell content extraction
+- Table boundary visualization
 
 ### 5. information_extraction.py
-- Trích xuất thông tin theo mẫu
-- Xử lý regex patterns
-- Phân loại thông tin
-- Định dạng kết quả
+- Template-based information extraction
+- Regex pattern processing
+- Information classification
+- Result formatting
 
 ### 6. cache_manager.py
-- Quản lý bộ nhớ cache
-- Lưu và đọc kết quả OCR
-- Tự động dọn dẹp cache cũ
-- Tối ưu hiệu suất truy xuất
+- Memory cache management
+- OCR result storage and retrieval
+- Automatic cache cleanup
+- Access performance optimization
 
 ### 7. validation.py
-- Kiểm tra tính hợp lệ đầu vào
-- Validate file và format
-- Kiểm tra cấu hình
-- Báo lỗi chi tiết
+- Input validation
+- File and format validation
+- Configuration validation
+- Detailed error reporting
 
 ### 8. exceptions.py
-- Định nghĩa các loại exception
-- Quản lý thông tin lỗi
-- Phân loại lỗi theo module
-- Hỗ trợ debug
+- Custom exception definitions
+- Error information management
+- Module-specific error classification
+- Debug support
 
 ### 9. logger.py
-- Quản lý logging hệ thống
-- Ghi log theo cấp độ
-- Lưu log vào file
-- Hiển thị log console
+- System logging management
+- Level-based logging
+- File logging
+- Console output
 
 ### 10. run_ocr.py
-- Script chạy chính
-- Xử lý tham số dòng lệnh
-- Kiểm tra môi trường
-- Hiển thị kết quả
+- Main execution script
+- Command-line parameter handling
+- Environment validation
+- Result display
 
-### 11. Lưu vào database
+### 11. Database Storage
+- Processed document and page information storage
 
 ### 12. config.json
-- Cấu hình cho các module
-- Tham số xử lý ảnh
-- Pattern trích xuất thông tin:
-- Cấu hình cache và logging
+- Module configuration
+- Image processing parameters
+- Information extraction patterns
+- Cache and logging configuration
 
-### 13. requirements.txt
+## 📦 Dependencies
+
+```txt
 opencv-python-headless==4.8.1.78
 tesserocr==2.6.0
 pdf2image==1.16.3
@@ -158,67 +167,118 @@ pillow==10.0.0
 numpy==1.24.3
 hashlib==20.3.0
 pickle5==0.0.12
+```
 
+## 🔄 Processing Workflow
 
-## Luồng Xử Lý
+### 1. Input Stage
+- PDF or image file upload
+- File validation
+- Format conversion
 
-1. **Đầu vào**
-   - File PDF hoặc ảnh
-   - Kiểm tra tính hợp lệ
-   - Chuyển đổi format
+### 2. Preprocessing
+- Image processing
+- Automatic rotation
+- Quality enhancement
 
-2. **Tiền xử lý**
-   - Xử lý ảnh
-   - Xoay tự động
-   - Tăng cường chất lượng
+### 3. Segmentation
+- Text region detection
+- Table detection
+- Region marking
 
-3. **Phân đoạn**
-   - Tìm vùng văn bản
-   - Phát hiện bảng
-   - Đánh dấu vùng
+### 4. OCR Processing
+- Parallel processing
+- Result caching
+- Text recognition
 
-4. **OCR**
-   - Xử lý song song
-   - Cache kết quả
-   - Nhận dạng text
+### 5. Information Extraction
+- Content analysis
+- Information extraction
+- Table processing
 
-5. **Trích xuất**
-   - Phân tích nội dung
-   - Trích xuất thông tin
-   - Xử lý bảng
+### 6. Output Generation
+- Processed images
+- OCR text
+- JSON results
+- Detailed logs
 
-6. **Đầu ra**
-   - Ảnh đã xử lý
-   - Text OCR
-   - JSON kết quả
-   - Log chi tiết
+## ✨ Key Features & Improvements
 
-## Cải Tiến
+### 🚀 Performance
+- Parallel processing
+- Intelligent caching
+- Memory optimization
 
-1. **Hiệu suất**
-   - Xử lý song song
-   - Cache thông minh
-   - Tối ưu bộ nhớ
+### 🎯 Accuracy
+- Automatic image rotation
+- Quality enhancement
+- Smart table processing
 
-2. **Độ chính xác**
-   - Xoay ảnh tự động
-   - Tăng cường chất lượng
-   - Xử lý bảng thông minh
+### 🔧 Maintainability
+- Detailed logging
+- Clear error handling
+- Modular architecture
 
-3. **Bảo trì**
-   - Logging chi tiết
-   - Xử lý lỗi rõ ràng
-   - Cấu trúc module hóa
+### 📈 Scalability
+- Easy feature addition
+- Flexible configuration
+- Clear API design
 
-4. **Mở rộng**
-   - Dễ thêm tính năng
-   - Cấu hình linh hoạt
-   - API rõ ràng
+## 💻 System Requirements
 
-## Yêu Cầu Hệ Thống
+- **Python**: 3.7+
+- **OCR Engine**: Tesseract OCR
+- **RAM**: 4GB minimum
+- **Storage**: 1GB minimum
+- **OS**: Windows/Linux/MacOS
 
-- Python 3.7+
-- Tesseract OCR
-- RAM: 4GB+
-- Disk: 1GB+
-- OS: Windows/Linux/MacOS
+## 🚀 Getting Started
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd legal-document-ocr
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Configure environment**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+4. **Run the application**
+   ```bash
+   python app/main.py
+   ```
+
+## 📚 API Documentation
+
+The system provides RESTful APIs for document processing:
+
+- `POST /api/v1/documents/` - Upload and process documents
+- `GET /api/v1/documents/{id}` - Retrieve document information
+- `GET /api/v1/pages/{id}` - Retrieve page information
+
+## 🧪 Testing
+
+Run the test suite:
+```bash
+pytest tests/
+```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Submit a pull request
