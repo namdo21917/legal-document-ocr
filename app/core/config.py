@@ -26,6 +26,10 @@ class Settings(BaseSettings):
         # r'C:\Users\adminb\Desktop\STUDY\IT\LapTrinhPython\poppler\poppler-24.08.0\Library\bin'
     )
 
+    MINIO_ENDPOINT: str = os.getenv('MINIO_ENDPOINT', 'http://minio:9000')
+    MINIO_ACCESS_KEY: str = os.getenv('MINIO_ACCESS_KEY', 'minioadmin')
+    MINIO_SECRET_KEY: str = os.getenv('MINIO_SECRET_KEY', 'minioadmin')
+    MINIO_BUCKET: str = os.getenv('MINIO_BUCKET', 'ocr-bucket')
 
     class Config:
         env_file = './.env'

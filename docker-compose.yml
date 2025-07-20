@@ -65,6 +65,39 @@ services:
       postgres:
         condition: service_healthy
 
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    volumes:
+      - minio_data:/data
+    command: server --console-address ":9001" /data
+    networks:
+      - ocr_network
+    restart: always
+
+  minio-client:
+    image: minio/mc:latest
+    container_name: minio_client
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+        sleep 10 && \
+        mc alias set myminio http://minio:9000 minioadmin minioadmin && \
+        mc mb -p myminio/ocr-bucket || true && \
+        mc policy set public myminio/ocr-bucket || true && \
+        tail -f /dev/null
+      "
+    networks:
+      - ocr_network
+    restart: always
+
 networks:
   ocr_network:
     driver: bridge
@@ -72,4 +105,5 @@ networks:
 volumes:
   postgres_data:
   pgadmin_data:
-  pip_cache: 
+  pip_cache:
+  minio_data: 

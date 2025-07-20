@@ -21,6 +21,7 @@ from app.utils.cache_manager import CacheManager
 from app.utils.exceptions import FileError, OCRProcessError, OCRError
 from app.utils.logger import Logger
 from app.utils.validation import Validator
+from app.services.storage_service import StorageService
 
 
 class OCRService:
@@ -29,6 +30,7 @@ class OCRService:
         self.validator = Validator()
         self.logger = Logger(__name__).logger
         self.num_threads = multiprocessing.cpu_count()
+        self.storage = StorageService()
 
         try:
             if not self.validator.validate_file(config_path):
@@ -56,34 +58,49 @@ class OCRService:
     async def process_document(self, file):
         self.logger.info(f"Bắt đầu xử lý tài liệu")
         try:
-            # Tạo các thư mục cần thiết
-            for dir_path in ['output', 'input_img']:
-                if not os.path.exists(dir_path):
-                    os.makedirs(dir_path)
+            # Tạo các thư mục cần thiết (chỉ còn output cho kết quả)
+            if not os.path.exists('output'):
+                os.makedirs('output')
 
             # Xử lý file input
             if isinstance(file, UploadFile):
                 # Tạo tên file với timestamp để tránh trùng lặp
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
                 filename = f"{timestamp}_{file.filename}"
-                input_path = os.path.join('input_img', filename)
-                
-                # Lưu file vào thư mục input_img
-                with open(input_path, "wb") as buffer:
-                    content = await file.read()
-                    buffer.write(content)
+                # Đọc nội dung file
+                content = await file.read()
                 await file.seek(0)
+                # Upload lên MinIO
+                minio_url = self.storage.upload_file(content, f"input/{filename}", file.content_type or 'application/octet-stream')
+                input_path = filename  # Lưu tên file để xử lý tiếp
             else:
                 input_path = file
                 
             try:
                 # Đọc và xử lý ảnh
+                file_bytes = None
+                if isinstance(file, UploadFile) or (isinstance(input_path, str) and not os.path.exists(input_path)):
+                    minio_key = f"input/{input_path}" if not input_path.startswith("input/") else input_path
+                    file_bytes = self.storage.download_file(minio_key)
+
                 if input_path.lower().endswith('.pdf'):
-                    images = self.preprocessor.convert_from_pdf(input_path)
+                    if file_bytes:
+                        # Lưu tạm file pdf để dùng convert_from_pdf
+                        tmp_pdf = f"/tmp/{input_path}"
+                        with open(tmp_pdf, "wb") as f:
+                            f.write(file_bytes)
+                        images = self.preprocessor.convert_from_pdf(tmp_pdf)
+                        os.remove(tmp_pdf)
+                    else:
+                        images = self.preprocessor.convert_from_pdf(input_path)
                     if not images:
                         raise FileError("Không thể chuyển đổi PDF", input_path)
                 else:
-                    images = [Image.open(input_path)]
+                    if file_bytes:
+                        from io import BytesIO
+                        images = [Image.open(BytesIO(file_bytes))]
+                    else:
+                        images = [Image.open(input_path)]
 
                 all_results = []
                 # Xử lý từng trang
