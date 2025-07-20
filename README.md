@@ -2,11 +2,11 @@
 
 A comprehensive OCR (Optical Character Recognition) system for processing legal documents with advanced table detection and information extraction capabilities.
 
-## 📋 Overview
+##  Overview
 
 This system allows clients to upload files (PDF, images) and receive OCR results in JSON format. The system processes each page and document, storing the results in a database. For pages containing tables, the system extracts individual cells and their content. Multi-page PDFs are processed as separate pages.
 
-## 🏗️ Project Structure
+##  Project Structure
 
 ```
 legal_document_ocr/
@@ -85,7 +85,7 @@ legal_document_ocr/
 └── README.md
 ```
 
-## 🔧 Core Business Logic Components
+##  Core Business Logic Components
 
 ### 1. image_preprocessing.py
 - Image preprocessing operations
@@ -157,7 +157,7 @@ legal_document_ocr/
 - Information extraction patterns
 - Cache and logging configuration
 
-## 📦 Dependencies
+##  Dependencies
 
 ```txt
 opencv-python-headless==4.8.1.78
@@ -169,7 +169,7 @@ hashlib==20.3.0
 pickle5==0.0.12
 ```
 
-## 🔄 Processing Workflow
+##  Processing Workflow
 
 ### 1. Input Stage
 - PDF or image file upload
@@ -202,29 +202,29 @@ pickle5==0.0.12
 - JSON results
 - Detailed logs
 
-## ✨ Key Features & Improvements
+##  Key Features & Improvements
 
-### 🚀 Performance
+###  Performance
 - Parallel processing
 - Intelligent caching
 - Memory optimization
 
-### 🎯 Accuracy
+### Accuracy
 - Automatic image rotation
 - Quality enhancement
 - Smart table processing
 
-### 🔧 Maintainability
+###  Maintainability
 - Detailed logging
 - Clear error handling
 - Modular architecture
 
-### 📈 Scalability
+###  Scalability
 - Easy feature addition
 - Flexible configuration
 - Clear API design
 
-## 💻 System Requirements
+##  System Requirements
 
 - **Python**: 3.7+
 - **OCR Engine**: Tesseract OCR
@@ -232,7 +232,7 @@ pickle5==0.0.12
 - **Storage**: 1GB minimum
 - **OS**: Windows/Linux/MacOS
 
-## 🚀 Getting Started
+##  Getting Started
 
 1. **Clone the repository**
    ```bash
@@ -256,7 +256,7 @@ pickle5==0.0.12
    python app/main.py
    ```
 
-## 📚 API Documentation
+##  API Documentation
 
 The system provides RESTful APIs for document processing:
 
@@ -264,18 +264,18 @@ The system provides RESTful APIs for document processing:
 - `GET /api/v1/documents/{id}` - Retrieve document information
 - `GET /api/v1/pages/{id}` - Retrieve page information
 
-## 🧪 Testing
+##  Testing
 
 Run the test suite:
 ```bash
 pytest tests/
 ```
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the repository
 2. Create a feature branch
